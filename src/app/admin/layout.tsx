@@ -33,6 +33,7 @@ const navItems = [
   { icon: Users, label: "Suppliers", href: "/admin/suppliers" },
   { icon: ShoppingCart, label: "Orders", href: "/admin/orders" },
   { icon: MessageSquare, label: "RFQs", href: "/admin/rfqs" },
+  { icon: Users, label: "Users", href: "/admin/users" },
   { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];

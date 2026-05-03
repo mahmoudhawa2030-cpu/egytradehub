@@ -146,3 +146,107 @@ create policy "Buyers can view own orders" on public.orders
 drop policy if exists "Buyers can create orders" on public.orders;
 create policy "Buyers can create orders" on public.orders
   for insert with check (auth.uid() = buyer_id);
+
+-- =============================================================
+-- 7. ADMIN POLICIES
+-- =============================================================
+
+-- Admin can read all profiles
+drop policy if exists "Admins can view all profiles" on public.profiles;
+create policy "Admins can view all profiles" on public.profiles
+  for select using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can update any profile (role, is_verified)
+drop policy if exists "Admins can update any profile" on public.profiles;
+create policy "Admins can update any profile" on public.profiles
+  for update using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can read all products
+drop policy if exists "Admins can view all products" on public.products;
+create policy "Admins can view all products" on public.products
+  for select using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can insert products
+drop policy if exists "Admins can insert products" on public.products;
+create policy "Admins can insert products" on public.products
+  for insert with check (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can update any product
+drop policy if exists "Admins can update any product" on public.products;
+create policy "Admins can update any product" on public.products
+  for update using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can delete any product
+drop policy if exists "Admins can delete any product" on public.products;
+create policy "Admins can delete any product" on public.products
+  for delete using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can read all RFQs
+drop policy if exists "Admins can view all RFQs" on public.rfqs;
+create policy "Admins can view all RFQs" on public.rfqs
+  for select using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can update any RFQ
+drop policy if exists "Admins can update any RFQ" on public.rfqs;
+create policy "Admins can update any RFQ" on public.rfqs
+  for update using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can read all orders
+drop policy if exists "Admins can view all orders" on public.orders;
+create policy "Admins can view all orders" on public.orders
+  for select using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Admin can update any order
+drop policy if exists "Admins can update any order" on public.orders;
+create policy "Admins can update any order" on public.orders
+  for update using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
