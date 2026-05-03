@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // ── Suppliers ────────────────────────────────────────────────
 export async function verifySupplier(userId: string) {
@@ -63,7 +64,7 @@ export async function updateUserProfile(
 }
 
 export async function createAdminUser(formData: FormData) {
-  const supabase = await createClient();
+  const adminSupabase = createAdminClient();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const full_name = formData.get("full_name") as string;
@@ -73,7 +74,7 @@ export async function createAdminUser(formData: FormData) {
 
   if (!email || !password) return { error: "Email and password are required" };
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
+  const { data: signUpData, error: signUpError } = await adminSupabase.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
@@ -85,7 +86,7 @@ export async function createAdminUser(formData: FormData) {
   const newUserId = signUpData.user?.id;
   if (!newUserId) return { error: "Failed to create user" };
 
-  const { error: profileError } = await supabase.from("profiles").upsert({
+  const { error: profileError } = await adminSupabase.from("profiles").upsert({
     user_id: newUserId,
     full_name,
     company_name,
