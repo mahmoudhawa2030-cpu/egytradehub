@@ -27,7 +27,8 @@ export default async function UsersPage({
   const { role: filterRole } = await searchParams;
   const supabase = await createClient();
 
-  const { data: { user: currentUser } } = await supabase.auth.getUser();
+  const authResult = await supabase.auth.getUser();
+  const currentUser = authResult.data?.user ?? null;
 
   let query = supabase
     .from("profiles")
@@ -38,8 +39,19 @@ export default async function UsersPage({
     query = query.eq("role", filterRole);
   }
 
-  const { data: users } = await query;
+  const { data: users, error: usersError } = await query;
   const list = users ?? [];
+
+  if (usersError) {
+    return (
+      <div className="p-8">
+        <div className="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700">
+          <p className="font-semibold mb-1">Database error</p>
+          <p className="text-sm font-mono">{usersError.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   const counts = {
     buyer: list.filter((u) => u.role === "buyer").length,

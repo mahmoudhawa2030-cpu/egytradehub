@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { X, UserPlus, Eye, EyeOff } from "lucide-react";
 import { createAdminUser } from "@/app/admin/actions";
 
@@ -13,7 +12,6 @@ export default function AddUserModal() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,7 +24,7 @@ export default function AddUserModal() {
       } else {
         setOpen(false);
         formRef.current?.reset();
-        router.refresh();
+        window.location.reload();
       }
     });
   }
