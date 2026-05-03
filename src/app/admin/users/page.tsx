@@ -24,6 +24,7 @@ export default async function UsersPage({
 }: {
   searchParams: Promise<{ role?: string }>;
 }) {
+  try {
   const { role: filterRole } = await searchParams;
   const supabase = await createClient();
 
@@ -219,4 +220,8 @@ export default async function UsersPage({
       </div>
     </div>
   );
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`Users page crashed: ${message}`);
+  }
 }
