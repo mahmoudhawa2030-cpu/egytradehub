@@ -77,16 +77,6 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  let role: string | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("user_id", user.id)
-      .single();
-    role = profile?.role ?? null;
-  }
-
   // Strip locale prefix for route matching
   const pathnameWithoutLocale = LOCALES.reduce(
     (p, l) => (p.startsWith(`/${l}/`) ? p.slice(l.length + 1) : p === `/${l}` ? "/" : p),
@@ -100,16 +90,18 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // /admin and /supplier routes are outside locale segments —
+  // role enforcement is handled by their own layouts (server components).
+  // Middleware only enforces that a session exists for protected routes.
+  if (pathnameWithoutLocale.startsWith("/admin") || pathnameWithoutLocale.startsWith("/supplier")) {
+    if (!user) {
+      return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+    }
+    return response;
+  }
+
   if (!user) {
     return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
-  }
-
-  if (pathnameWithoutLocale.startsWith("/admin") && role !== "admin") {
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
-  }
-
-  if (pathnameWithoutLocale.startsWith("/supplier") && role !== "supplier" && role !== "admin") {
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
 
   return response;
