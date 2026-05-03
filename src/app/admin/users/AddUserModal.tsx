@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { X, UserPlus, Eye, EyeOff } from "lucide-react";
 import { createAdminUser } from "@/app/admin/actions";
 
@@ -11,6 +12,8 @@ export default function AddUserModal() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,7 +25,8 @@ export default function AddUserModal() {
         setError(result.error);
       } else {
         setOpen(false);
-        (e.target as HTMLFormElement).reset();
+        formRef.current?.reset();
+        router.refresh();
       }
     });
   }
@@ -48,7 +52,7 @@ export default function AddUserModal() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4">
               {error && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
               )}

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -97,7 +98,6 @@ export async function createAdminUser(formData: FormData) {
   });
 
   if (profileError) return { error: profileError.message };
-  revalidatePath("/admin/users");
   return { success: true };
 }
 
