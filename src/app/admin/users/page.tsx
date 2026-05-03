@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { changeUserRole, suspendUser } from "@/app/admin/actions";
-import { Users, ShieldCheck, ShoppingBag, UserX } from "lucide-react";
+import { banUser, unbanUser } from "@/app/admin/actions";
+import { Users, ShieldCheck, ShoppingBag, ShieldBan, ShieldCheck as ShieldUnban } from "lucide-react";
+import AddUserModal from "./AddUserModal";
+import EditUserModal from "./EditUserModal";
 
 const ROLES = ["buyer", "supplier", "admin"] as const;
 type Role = (typeof ROLES)[number];
@@ -29,7 +31,7 @@ export default async function UsersPage({
 
   let query = supabase
     .from("profiles")
-    .select("user_id, full_name, company_name, country, role, is_verified, created_at")
+    .select("user_id, full_name, company_name, country, role, is_verified, is_banned, created_at")
     .order("created_at", { ascending: false });
 
   if (filterRole && ROLES.includes(filterRole as Role)) {
@@ -40,10 +42,10 @@ export default async function UsersPage({
   const list = users ?? [];
 
   const counts = {
-    all: list.length,
     buyer: list.filter((u) => u.role === "buyer").length,
     supplier: list.filter((u) => u.role === "supplier").length,
     admin: list.filter((u) => u.role === "admin").length,
+    banned: list.filter((u) => u.is_banned).length,
   };
 
   return (
@@ -53,36 +55,42 @@ export default async function UsersPage({
           <h1 className="text-2xl font-display font-bold text-neutral-900">Users</h1>
           <p className="text-neutral-500 mt-1">Manage all platform users and their roles</p>
         </div>
+        <AddUserModal />
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        {(["all", "buyer", "supplier", "admin"] as const).map((r) => (
+        {([
+          { key: "all", label: "All Users", count: list.length, color: "bg-neutral-100 text-neutral-500", border: "bg-neutral-50" },
+          { key: "buyer", label: "Buyers", count: counts.buyer, color: "bg-blue-50 text-blue-600", border: "bg-blue-50" },
+          { key: "supplier", label: "Suppliers", count: counts.supplier, color: "bg-green-50 text-green-600", border: "bg-green-50" },
+          { key: "admin", label: "Admins", count: counts.admin, color: "bg-orange-50 text-[#FF6A00]", border: "bg-orange-50" },
+        ] as const).map((s) => (
           <a
-            key={r}
-            href={r === "all" ? "/admin/users" : `/admin/users?role=${r}`}
+            key={s.key}
+            href={s.key === "all" ? "/admin/users" : `/admin/users?role=${s.key}`}
             className={`bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3 transition hover:border-[#FF6A00] ${
-              (r === "all" && !filterRole) || filterRole === r ? "border-[#FF6A00]" : "border-neutral-200"
+              (s.key === "all" && !filterRole) || filterRole === s.key ? "border-[#FF6A00]" : "border-neutral-200"
             }`}
           >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-              r === "all" ? "bg-neutral-100" :
-              r === "buyer" ? "bg-blue-50" :
-              r === "supplier" ? "bg-green-50" : "bg-orange-50"
-            }`}>
-              <Users className={`w-5 h-5 ${
-                r === "all" ? "text-neutral-500" :
-                r === "buyer" ? "text-blue-600" :
-                r === "supplier" ? "text-green-600" : "text-[#FF6A00]"
-              }`} />
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${s.color}`}>
+              <Users className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-neutral-500 capitalize">{r === "all" ? "All Users" : `${r}s`}</p>
-              <p className="text-xl font-bold text-neutral-900">{r === "all" ? list.length : counts[r]}</p>
+              <p className="text-xs text-neutral-500">{s.label}</p>
+              <p className="text-xl font-bold text-neutral-900">{s.count}</p>
             </div>
           </a>
         ))}
       </div>
+
+      {/* Banned alert strip */}
+      {counts.banned > 0 && (
+        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
+          <ShieldBan className="w-4 h-4 flex-shrink-0" />
+          <span><strong>{counts.banned}</strong> banned {counts.banned === 1 ? "user" : "users"} in this list.</span>
+        </div>
+      )}
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
@@ -96,6 +104,7 @@ export default async function UsersPage({
                 <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Country</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Role</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Verified</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Status</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Joined</th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-neutral-700">Actions</th>
               </tr>
@@ -106,11 +115,14 @@ export default async function UsersPage({
                 const role = user.role as Role;
                 const RoleIcon = roleIcon[role];
                 const isSelf = user.user_id === currentUser?.id;
+                const isBanned = user.is_banned ?? false;
                 return (
-                  <tr key={user.user_id} className="hover:bg-neutral-50 transition">
+                  <tr key={user.user_id} className={`hover:bg-neutral-50 transition ${isBanned ? "opacity-60" : ""}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center font-bold text-sm text-neutral-600">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                          isBanned ? "bg-red-100 text-red-500" : "bg-neutral-100 text-neutral-600"
+                        }`}>
                           {name.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -133,6 +145,15 @@ export default async function UsersPage({
                         <span className="px-2 py-1 bg-neutral-100 text-neutral-500 rounded-full text-xs font-medium">No</span>
                       )}
                     </td>
+                    <td className="px-6 py-4">
+                      {isBanned ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                          <ShieldBan className="w-3 h-3" /> Banned
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Active</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 text-sm text-neutral-600">
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
@@ -140,36 +161,37 @@ export default async function UsersPage({
                       {isSelf ? (
                         <span className="text-xs text-neutral-400 italic">You</span>
                       ) : (
-                        <div className="flex items-center justify-end gap-2">
-                          <form action={async (fd: FormData) => {
-                            "use server";
-                            const newRole = fd.get("role") as Role;
-                            await changeUserRole(user.user_id, newRole);
-                          }} className="flex items-center gap-2">
-                            <select
-                              name="role"
-                              defaultValue={role}
-                              className="text-sm border border-neutral-200 rounded-lg px-2 py-1 focus:outline-none focus:border-[#FF6A00]"
-                            >
-                              {ROLES.map((r) => (
-                                <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
-                              ))}
-                            </select>
-                            <button
-                              type="submit"
-                              className="text-xs px-3 py-1.5 bg-[#FF6A00] text-white rounded-lg hover:bg-[#FF8C00] transition"
-                            >
-                              Change
-                            </button>
-                          </form>
-                          {role !== "admin" && (
-                            <form action={suspendUser.bind(null, user.user_id)}>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Edit */}
+                          <EditUserModal user={{
+                            user_id: user.user_id,
+                            full_name: user.full_name,
+                            company_name: user.company_name,
+                            country: user.country,
+                            role: user.role,
+                            is_verified: user.is_verified,
+                            is_banned: isBanned,
+                          }} />
+
+                          {/* Ban / Unban */}
+                          {!isBanned ? (
+                            <form action={banUser.bind(null, user.user_id)}>
                               <button
                                 type="submit"
                                 className="p-1.5 hover:bg-red-50 rounded-lg transition"
-                                title="Suspend user"
+                                title="Ban user"
                               >
-                                <UserX className="w-4 h-4 text-red-500" />
+                                <ShieldBan className="w-4 h-4 text-red-500" />
+                              </button>
+                            </form>
+                          ) : (
+                            <form action={unbanUser.bind(null, user.user_id)}>
+                              <button
+                                type="submit"
+                                className="p-1.5 hover:bg-green-50 rounded-lg transition"
+                                title="Unban user"
+                              >
+                                <ShieldUnban className="w-4 h-4 text-green-600" />
                               </button>
                             </form>
                           )}

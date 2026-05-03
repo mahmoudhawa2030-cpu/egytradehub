@@ -39,6 +39,67 @@ export async function changeUserRole(userId: string, role: "buyer" | "supplier" 
   revalidatePath("/admin/users");
 }
 
+export async function banUser(userId: string) {
+  const supabase = await createClient();
+  await supabase.from("profiles").update({ is_banned: true }).eq("user_id", userId);
+  revalidatePath("/admin/users");
+}
+
+export async function unbanUser(userId: string) {
+  const supabase = await createClient();
+  await supabase.from("profiles").update({ is_banned: false }).eq("user_id", userId);
+  revalidatePath("/admin/users");
+}
+
+export async function updateUserProfile(
+  userId: string,
+  data: { full_name?: string; company_name?: string; country?: string; role?: string; is_verified?: boolean }
+) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update(data).eq("user_id", userId);
+  revalidatePath("/admin/users");
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function createAdminUser(formData: FormData) {
+  const supabase = await createClient();
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const full_name = formData.get("full_name") as string;
+  const company_name = (formData.get("company_name") as string) || null;
+  const country = (formData.get("country") as string) || null;
+  const role = (formData.get("role") as string) || "buyer";
+
+  if (!email || !password) return { error: "Email and password are required" };
+
+  const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { full_name },
+  });
+
+  if (signUpError) return { error: signUpError.message };
+
+  const newUserId = signUpData.user?.id;
+  if (!newUserId) return { error: "Failed to create user" };
+
+  const { error: profileError } = await supabase.from("profiles").upsert({
+    user_id: newUserId,
+    full_name,
+    company_name,
+    country,
+    role,
+    is_verified: role === "supplier" ? false : true,
+    is_banned: false,
+  });
+
+  if (profileError) return { error: profileError.message };
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
 // ── Orders ───────────────────────────────────────────────────
 export async function updateOrderStatus(
   orderId: string,

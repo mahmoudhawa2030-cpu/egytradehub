@@ -26,6 +26,7 @@ create table if not exists public.profiles (
   company_name text,
   country text,
   is_verified boolean not null default false,
+  is_banned boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -146,6 +147,11 @@ create policy "Buyers can view own orders" on public.orders
 drop policy if exists "Buyers can create orders" on public.orders;
 create policy "Buyers can create orders" on public.orders
   for insert with check (auth.uid() = buyer_id);
+
+-- =============================================================
+-- 6b. MIGRATIONS (safe to run multiple times)
+-- =============================================================
+alter table public.profiles add column if not exists is_banned boolean not null default false;
 
 -- =============================================================
 -- 7. ADMIN POLICIES
