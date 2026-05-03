@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.env*
+nginx/certs
+*.tsbuildinfo
+next-env.d.ts
+coverage
+.vercel
