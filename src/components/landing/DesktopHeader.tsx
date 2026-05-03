@@ -123,12 +123,12 @@ export default function DesktopHeader() {
               <span className="text-xs">{t.common.messages}</span>
             </button>
             {user ? (
-              <div className="flex flex-col items-center gap-1 text-neutral-600">
+              <Link href={`/${locale}/account`} className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
                 <div className="w-6 h-6 rounded-full bg-[#FF6A00] text-white flex items-center justify-center text-xs font-bold">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-xs">{user.email?.split("@")[0]}</span>
-              </div>
+              </Link>
             ) : (
               <Link href={`/${locale}/login`} className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
                 <User className="w-6 h-6" />
