@@ -47,6 +47,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Auth middleware ──────────────────────────────────────────
+  // /admin and /supplier have their own server-component auth guards — skip here.
+  if (pathname.startsWith("/admin") || pathname.startsWith("/supplier")) {
+    return NextResponse.next({ request: { headers: request.headers } });
+  }
+
   let response = NextResponse.next({
     request: { headers: request.headers },
   });
@@ -87,16 +92,6 @@ export async function middleware(request: NextRequest) {
 
   const publicRoutes = ["/", "/login", "/signup", "/forgot-password"];
   if (publicRoutes.some((r) => pathnameWithoutLocale === r || pathnameWithoutLocale.startsWith(r + "?"))) {
-    return response;
-  }
-
-  // /admin and /supplier routes are outside locale segments —
-  // role enforcement is handled by their own layouts (server components).
-  // Middleware only enforces that a session exists for protected routes.
-  if (pathnameWithoutLocale.startsWith("/admin") || pathnameWithoutLocale.startsWith("/supplier")) {
-    if (!user) {
-      return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
-    }
     return response;
   }
 

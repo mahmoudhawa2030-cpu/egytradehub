@@ -13,19 +13,19 @@ import {
   Tag,
 } from "lucide-react";
 
-async function getUserRole() {
+async function getUserRole(): Promise<{ role: string | null; loggedIn: boolean }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) return null;
-  
+
+  if (!user) return { role: null, loggedIn: false };
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("user_id", user.id)
     .single();
-    
-  return profile?.role ?? null;
+
+  return { role: profile?.role ?? null, loggedIn: true };
 }
 
 const navItems = [
@@ -45,11 +45,14 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const role = await getUserRole();
-  
-  // Protect admin routes
+  const { role, loggedIn } = await getUserRole();
+
+  if (!loggedIn) {
+    redirect("/en/login");
+  }
+
   if (role !== "admin") {
-    redirect("/");
+    redirect("/en");
   }
 
   return (
