@@ -13,5 +13,16 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
 
   if (!product) notFound();
 
-  return <EditProductForm product={product} />;
+  const { data: catData } = await supabase
+    .from("categories")
+    .select("name")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+
+  const categories = catData?.map((c) => c.name) ?? [
+    "Electronics", "Machinery", "Textiles", "Chemicals",
+    "Safety", "Packaging", "Healthcare", "Logistics", "Other",
+  ];
+
+  return <EditProductForm product={product} categories={categories} />;
 }

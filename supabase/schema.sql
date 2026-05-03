@@ -256,3 +256,55 @@ create policy "Admins can update any order" on public.orders
       where p.user_id = auth.uid() and p.role = 'admin'
     )
   );
+
+-- =============================================================
+-- 8. CATEGORIES
+-- =============================================================
+create table if not exists public.categories (
+  id   uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  slug text not null unique,
+  icon text,
+  description text,
+  is_active boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists categories_slug_idx    on public.categories(slug);
+create index if not exists categories_active_idx  on public.categories(is_active);
+create index if not exists categories_sort_idx    on public.categories(sort_order);
+
+alter table public.categories enable row level security;
+
+-- Anyone can read active categories
+drop policy if exists "Categories are publicly readable" on public.categories;
+create policy "Categories are publicly readable" on public.categories
+  for select using (is_active = true);
+
+-- Admins can do everything
+drop policy if exists "Admins can manage categories" on public.categories;
+create policy "Admins can manage categories" on public.categories
+  for all using (
+    exists (
+      select 1 from public.profiles p
+      where p.user_id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- Seed default categories (idempotent)
+insert into public.categories (name, slug, icon, sort_order) values
+  ('Electronics',  'electronics',  'Monitor',       1),
+  ('Machinery',    'machinery',    'Settings',      2),
+  ('Textiles',     'textiles',     'Shirt',         3),
+  ('Chemicals',    'chemicals',    'FlaskConical',  4),
+  ('Safety',       'safety',       'ShieldCheck',   5),
+  ('Packaging',    'packaging',    'Layers',        6),
+  ('Healthcare',   'healthcare',   'HeartPulse',    7),
+  ('Logistics',    'logistics',    'Truck',         8),
+  ('Food',         'food',         'Apple',         9),
+  ('Automotive',   'automotive',   'Car',           10),
+  ('Raw Materials','raw-materials','Package',       11),
+  ('OEM/ODM',      'oem-odm',      'Users',         12),
+  ('Other',        'other',        'MoreHorizontal',99)
+on conflict (slug) do nothing;

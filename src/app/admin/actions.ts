@@ -173,6 +173,55 @@ export async function updateProduct(productId: string, formData: FormData) {
   return { success: true };
 }
 
+// ── Categories ────────────────────────────────────────────────
+export async function createCategory(formData: FormData) {
+  const supabase = await createClient();
+  const name = (formData.get("name") as string).trim();
+  const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const { error } = await supabase.from("categories").insert({
+    name,
+    slug,
+    icon: (formData.get("icon") as string) || null,
+    description: (formData.get("description") as string) || null,
+    sort_order: parseInt(formData.get("sort_order") as string, 10) || 0,
+    is_active: formData.get("is_active") !== "false",
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/admin/categories");
+  return { success: true };
+}
+
+export async function updateCategory(id: string, formData: FormData) {
+  const supabase = await createClient();
+  const name = (formData.get("name") as string).trim();
+  const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const { error } = await supabase.from("categories").update({
+    name,
+    slug,
+    icon: (formData.get("icon") as string) || null,
+    description: (formData.get("description") as string) || null,
+    sort_order: parseInt(formData.get("sort_order") as string, 10) || 0,
+    is_active: formData.get("is_active") === "true",
+  }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/categories");
+  return { success: true };
+}
+
+export async function deleteCategory(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("categories").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/categories");
+  return { success: true };
+}
+
+export async function toggleCategoryActive(id: string, is_active: boolean) {
+  const supabase = await createClient();
+  await supabase.from("categories").update({ is_active }).eq("id", id);
+  revalidatePath("/admin/categories");
+}
+
 // ── RFQs ─────────────────────────────────────────────────────
 export async function updateRfqStatus(rfqId: string, status: "pending" | "replied" | "closed") {
   const supabase = await createClient();

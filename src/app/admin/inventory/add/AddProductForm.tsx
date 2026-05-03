@@ -4,26 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Zap } from "lucide-react";
-import { updateProduct } from "@/app/admin/actions";
+import { createProduct } from "@/app/admin/actions";
 
-interface Product {
-  id: string;
-  name: string;
-  description: string | null;
-  category: string;
-  base_price: number;
-  moq: number;
-  image_url: string | null;
-  is_flash_deal: boolean;
-  flash_discount_pct: number | null;
-  flash_starts_at: string | null;
-  flash_ends_at: string | null;
-}
-
-export default function EditProductForm({ product, categories }: { product: Product; categories: string[] }) {
+export default function AddProductForm({ categories }: { categories: string[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [isFlash, setIsFlash] = useState(product.is_flash_deal);
+  const [isFlash, setIsFlash] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -31,7 +17,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
     const formData = new FormData(e.currentTarget);
     formData.set("is_flash_deal", isFlash ? "true" : "false");
     startTransition(async () => {
-      const result = await updateProduct(product.id, formData);
+      const result = await createProduct(formData);
       if (result?.error) {
         setError(result.error);
       } else {
@@ -47,8 +33,8 @@ export default function EditProductForm({ product, categories }: { product: Prod
           <ArrowLeft className="w-5 h-5 text-neutral-600" />
         </Link>
         <div>
-          <h1 className="text-2xl font-display font-bold text-neutral-900">Edit Product</h1>
-          <p className="text-neutral-500 mt-1 truncate max-w-md">{product.name}</p>
+          <h1 className="text-2xl font-display font-bold text-neutral-900">Add Product</h1>
+          <p className="text-neutral-500 mt-1">Add a new product to the platform</p>
         </div>
       </div>
 
@@ -65,7 +51,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
             <input
               name="name"
               required
-              defaultValue={product.name}
+              placeholder="e.g. Hydraulic Pump Set Industrial"
               className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
             />
           </div>
@@ -75,7 +61,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
             <textarea
               name="description"
               rows={3}
-              defaultValue={product.description ?? ""}
+              placeholder="Product description..."
               className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00] resize-none"
             />
           </div>
@@ -86,9 +72,9 @@ export default function EditProductForm({ product, categories }: { product: Prod
               <select
                 name="category"
                 required
-                defaultValue={product.category}
                 className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
               >
+                <option value="">Select category</option>
                 {categories.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
@@ -97,7 +83,6 @@ export default function EditProductForm({ product, categories }: { product: Prod
               <input
                 name="image_url"
                 type="url"
-                defaultValue={product.image_url ?? ""}
                 placeholder="https://..."
                 className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
               />
@@ -113,7 +98,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
                 min="0"
                 step="0.01"
                 required
-                defaultValue={product.base_price}
+                placeholder="0.00"
                 className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
               />
             </div>
@@ -124,7 +109,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
                 type="number"
                 min="1"
                 required
-                defaultValue={product.moq}
+                placeholder="1"
                 className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
               />
             </div>
@@ -158,7 +143,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
                   type="number"
                   min="1"
                   max="99"
-                  defaultValue={product.flash_discount_pct ?? ""}
+                  placeholder="20"
                   className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
                 />
               </div>
@@ -167,7 +152,6 @@ export default function EditProductForm({ product, categories }: { product: Prod
                 <input
                   name="flash_starts_at"
                   type="datetime-local"
-                  defaultValue={product.flash_starts_at?.slice(0, 16) ?? ""}
                   className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
                 />
               </div>
@@ -176,7 +160,6 @@ export default function EditProductForm({ product, categories }: { product: Prod
                 <input
                   name="flash_ends_at"
                   type="datetime-local"
-                  defaultValue={product.flash_ends_at?.slice(0, 16) ?? ""}
                   className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
                 />
               </div>
@@ -197,7 +180,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
             className="flex items-center gap-2 px-6 py-2.5 bg-[#FF6A00] text-white rounded-lg font-semibold hover:bg-[#FF8C00] transition disabled:opacity-60"
           >
             <Save className="w-4 h-4" />
-            {isPending ? "Saving..." : "Save Changes"}
+            {isPending ? "Saving..." : "Save Product"}
           </button>
         </div>
       </form>

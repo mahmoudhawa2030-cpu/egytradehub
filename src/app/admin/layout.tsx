@@ -10,6 +10,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  Tag,
 } from "lucide-react";
 
 async function getUserRole() {
@@ -28,14 +29,15 @@ async function getUserRole() {
 }
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },
-  { icon: Package, label: "Inventory", href: "/admin/inventory" },
-  { icon: Users, label: "Suppliers", href: "/admin/suppliers" },
-  { icon: ShoppingCart, label: "Orders", href: "/admin/orders" },
-  { icon: MessageSquare, label: "RFQs", href: "/admin/rfqs" },
-  { icon: Users, label: "Users", href: "/admin/users" },
-  { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },
-  { icon: Settings, label: "Settings", href: "/admin/settings" },
+  { icon: LayoutDashboard, label: "Dashboard",  href: "/admin/dashboard" },
+  { icon: Package,         label: "Inventory",  href: "/admin/inventory" },
+  { icon: Tag,             label: "Categories", href: "/admin/categories" },
+  { icon: Users,           label: "Suppliers",  href: "/admin/suppliers" },
+  { icon: ShoppingCart,    label: "Orders",     href: "/admin/orders" },
+  { icon: MessageSquare,   label: "RFQs",       href: "/admin/rfqs" },
+  { icon: Users,           label: "Users",      href: "/admin/users" },
+  { icon: BarChart3,       label: "Analytics",  href: "/admin/analytics" },
+  { icon: Settings,        label: "Settings",   href: "/admin/settings" },
 ];
 
 export default async function AdminLayout({
