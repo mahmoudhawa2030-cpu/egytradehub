@@ -43,13 +43,15 @@ export async function changeUserRole(userId: string, role: "buyer" | "supplier" 
 
 export async function banUser(userId: string) {
   const supabase = await createClient();
-  await supabase.from("profiles").update({ is_banned: true }).eq("user_id", userId);
+  const { error } = await supabase.from("profiles").update({ is_banned: true }).eq("user_id", userId);
+  if (error) throw new Error(`Ban failed: ${error.message}`);
   revalidatePath("/admin/users");
 }
 
 export async function unbanUser(userId: string) {
   const supabase = await createClient();
-  await supabase.from("profiles").update({ is_banned: false }).eq("user_id", userId);
+  const { error } = await supabase.from("profiles").update({ is_banned: false }).eq("user_id", userId);
+  if (error) throw new Error(`Unban failed: ${error.message}`);
   revalidatePath("/admin/users");
 }
 
