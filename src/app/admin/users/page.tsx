@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { banUser, unbanUser } from "@/app/admin/actions";
-import { Users, ShieldCheck, ShoppingBag, ShieldBan, ShieldCheck as ShieldUnban } from "lucide-react";
+import { Users, ShieldCheck, ShoppingBag, ShieldBan } from "lucide-react";
 import AddUserModal from "./AddUserModal";
-import EditUserModal from "./EditUserModal";
+import UserActions from "./UserActions";
 
 const ROLES = ["buyer", "supplier", "admin"] as const;
 type Role = (typeof ROLES)[number];
@@ -174,41 +173,15 @@ export default async function UsersPage({
                       {isSelf ? (
                         <span className="text-xs text-neutral-400 italic">You</span>
                       ) : (
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* Edit */}
-                          <EditUserModal user={{
-                            user_id: user.user_id,
-                            full_name: user.full_name,
-                            company_name: user.company_name,
-                            country: user.country,
-                            role: user.role,
-                            is_verified: user.is_verified,
-                            is_banned: isBanned,
-                          }} />
-
-                          {/* Ban / Unban */}
-                          {!isBanned ? (
-                            <form action={banUser.bind(null, user.user_id)}>
-                              <button
-                                type="submit"
-                                className="p-1.5 hover:bg-red-50 rounded-lg transition"
-                                title="Ban user"
-                              >
-                                <ShieldBan className="w-4 h-4 text-red-500" />
-                              </button>
-                            </form>
-                          ) : (
-                            <form action={unbanUser.bind(null, user.user_id)}>
-                              <button
-                                type="submit"
-                                className="p-1.5 hover:bg-green-50 rounded-lg transition"
-                                title="Unban user"
-                              >
-                                <ShieldUnban className="w-4 h-4 text-green-600" />
-                              </button>
-                            </form>
-                          )}
-                        </div>
+                        <UserActions user={{
+                          user_id: user.user_id,
+                          full_name: user.full_name,
+                          company_name: user.company_name,
+                          country: user.country,
+                          role: user.role,
+                          is_verified: user.is_verified,
+                          is_banned: isBanned,
+                        }} />
                       )}
                     </td>
                   </tr>
