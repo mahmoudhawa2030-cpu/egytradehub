@@ -2,16 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, MessageSquare, User, ChevronDown, Menu, Globe, Heart } from "lucide-react";
+import { Search, ShoppingCart, MessageSquare, User, ChevronDown, Menu, Heart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-
-const topNavLinks = [
-  { label: "Products", href: "/products" },
-  { label: "Suppliers", href: "/suppliers" },
-  { label: "RFQ", href: "/rfq" },
-  { label: "Help", href: "/help" },
-  { label: "Download App", href: "#" },
-];
+import { useI18n } from "@/i18n/context";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const categoryNav = [
   "Consumer Electronics",
@@ -27,6 +21,7 @@ const categoryNav = [
 ];
 
 export default function DesktopHeader() {
+  const { t, locale } = useI18n();
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCategories, setShowCategories] = useState(false);
@@ -40,6 +35,14 @@ export default function DesktopHeader() {
     checkAuth();
   }, [supabase]);
 
+  const topNavLinks = [
+    { label: t.common.products, href: `/${locale}/products` },
+    { label: t.common.suppliers, href: `/${locale}/suppliers` },
+    { label: t.common.rfq, href: `/${locale}/rfq` },
+    { label: t.common.help, href: `/${locale}/help` },
+    { label: t.common.downloadApp, href: "#" },
+  ];
+
   return (
     <header className="bg-white shadow-sm">
       {/* Top bar */}
@@ -47,12 +50,8 @@ export default function DesktopHeader() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-9 text-xs">
             <div className="flex items-center gap-6">
-              <span className="text-neutral-500">Welcome to TradeHub</span>
-              <div className="flex items-center gap-1 text-[#FF6A00] font-medium cursor-pointer">
-                <Globe className="w-3.5 h-3.5" />
-                <span>English</span>
-                <ChevronDown className="w-3 h-3" />
-              </div>
+              <span className="text-neutral-500">{t.common.welcome}</span>
+              <LanguageSwitcher />
             </div>
             <div className="flex items-center gap-6">
               {topNavLinks.map((link) => (
@@ -91,12 +90,12 @@ export default function DesktopHeader() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="What are you looking for..."
+                  placeholder={t.common.searchPlaceholderDesktop}
                   className="w-full pl-10 pr-4 py-3 border-2 border-[#FF6A00] rounded-l-lg focus:outline-none text-sm"
                 />
               </div>
               <button className="px-8 py-3 bg-[#FF6A00] text-white font-semibold rounded-r-lg hover:bg-[#FF8C00] transition">
-                Search
+                {t.common.search}
               </button>
             </div>
             <div className="flex items-center gap-4 mt-2 text-xs text-neutral-500">
@@ -113,15 +112,15 @@ export default function DesktopHeader() {
           <div className="flex items-center gap-6">
             <button className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
               <ShoppingCart className="w-6 h-6" />
-              <span className="text-xs">Cart</span>
+              <span className="text-xs">{t.common.cart}</span>
             </button>
             <button className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
               <Heart className="w-6 h-6" />
-              <span className="text-xs">Wishlist</span>
+              <span className="text-xs">{t.common.wishlist}</span>
             </button>
             <button className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
               <MessageSquare className="w-6 h-6" />
-              <span className="text-xs">Messages</span>
+              <span className="text-xs">{t.common.messages}</span>
             </button>
             {user ? (
               <div className="flex flex-col items-center gap-1 text-neutral-600">
@@ -131,9 +130,9 @@ export default function DesktopHeader() {
                 <span className="text-xs">{user.email?.split("@")[0]}</span>
               </div>
             ) : (
-              <Link href="/login" className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
+              <Link href={`/${locale}/login`} className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
                 <User className="w-6 h-6" />
-                <span className="text-xs">Sign In</span>
+                <span className="text-xs">{t.common.signIn}</span>
               </Link>
             )}
           </div>
@@ -149,7 +148,7 @@ export default function DesktopHeader() {
               className="flex items-center gap-2 px-4 py-3 bg-[#FF6A00] text-white font-medium hover:bg-[#FF8C00] transition"
             >
               <Menu className="w-5 h-5" />
-              Categories
+              {t.common.categories}
               <ChevronDown className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-1 ml-4">
@@ -164,10 +163,10 @@ export default function DesktopHeader() {
               ))}
             </div>
             <Link
-              href="/deals"
+              href={`/${locale}/deals`}
               className="ml-auto px-4 py-3 text-sm font-medium text-[#FF6A00] hover:bg-orange-50 transition"
             >
-              Flash Deals →
+              {t.common.flashDeals} →
             </Link>
           </div>
         </div>

@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { ChevronRight, BadgeCheck, ShoppingCart, Heart, TrendingUp } from "lucide-react";
 import { trendingProducts, topSuppliers, TrendingProduct, Supplier } from "./data";
+import { useI18n } from "@/i18n/context";
 
 function ProductCard({ product }: { product: TrendingProduct }) {
+  const { t, locale } = useI18n();
   return (
-    <Link href={`/products/${product.id}`} className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+    <Link href={`/${locale}/products/${product.id}`} className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
       <div className={`h-48 ${product.bg} flex items-center justify-center relative`}>
         <div className="text-center p-4">
           <p className="text-sm font-medium text-neutral-600">{product.name}</p>
-          <p className="text-xs text-neutral-500 mt-1">Product Image</p>
+          <p className="text-xs text-neutral-500 mt-1">{t.products.productImage}</p>
         </div>
         {product.badge && (
           <div className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-semibold ${
@@ -37,8 +39,8 @@ function ProductCard({ product }: { product: TrendingProduct }) {
           </span>
         </div>
         <div className="flex items-center justify-between text-xs text-neutral-500 mb-3">
-          <span>MOQ: {product.moq} units</span>
-          <span>Price: ${product.priceLow} - ${product.priceHigh}</span>
+          <span>{t.products.moq}: {product.moq} {t.products.units}</span>
+          <span>${product.priceLow} - ${product.priceHigh}</span>
         </div>
         <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
           <div className="flex items-center gap-1.5">
@@ -57,6 +59,7 @@ function ProductCard({ product }: { product: TrendingProduct }) {
 }
 
 function SupplierCard({ supplier }: { supplier: Supplier }) {
+  const { t, locale } = useI18n();
   return (
     <div className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md transition">
       <div className="flex items-center gap-3 mb-3">
@@ -70,7 +73,7 @@ function SupplierCard({ supplier }: { supplier: Supplier }) {
       </div>
       <div className="flex items-center gap-1 mb-3">
         <span className="text-yellow-500 font-bold">{supplier.rating}</span>
-        <span className="text-sm text-neutral-400">({supplier.reviewCount} reviews)</span>
+        <span className="text-sm text-neutral-400">({supplier.reviewCount} {t.products.reviews})</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {supplier.tags.map((tag) => (
@@ -80,16 +83,17 @@ function SupplierCard({ supplier }: { supplier: Supplier }) {
         ))}
       </div>
       <Link
-        href={`/suppliers/${supplier.id}`}
+        href={`/${locale}/suppliers/${supplier.id}`}
         className="block text-center mt-4 py-2 border border-[#FF6A00] text-[#FF6A00] rounded-lg text-sm font-medium hover:bg-[#FF6A00] hover:text-white transition"
       >
-        View Products
+        {t.products.viewProducts}
       </Link>
     </div>
   );
 }
 
 export default function DesktopProducts() {
+  const { t, locale } = useI18n();
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Trending Products Section */}
@@ -100,12 +104,12 @@ export default function DesktopProducts() {
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-display font-bold text-neutral-900">Trending Products</h2>
-              <p className="text-sm text-neutral-500">Most popular wholesale items this week</p>
+              <h2 className="text-xl font-display font-bold text-neutral-900">{t.products.trendingProducts}</h2>
+              <p className="text-sm text-neutral-500">{t.products.trendingDesc}</p>
             </div>
           </div>
-          <Link href="/products" className="flex items-center gap-1 text-[#FF6A00] font-medium hover:underline">
-            View all products
+          <Link href={`/${locale}/products`} className="flex items-center gap-1 text-[#FF6A00] font-medium hover:underline">
+            {t.products.viewAllProducts}
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
@@ -124,12 +128,12 @@ export default function DesktopProducts() {
               <span className="text-white font-bold text-sm">-70%</span>
             </div>
             <div>
-              <h2 className="text-xl font-display font-bold text-neutral-900">Flash Deals</h2>
-              <p className="text-sm text-neutral-500">Limited time offers - Ends in 23:45:12</p>
+              <h2 className="text-xl font-display font-bold text-neutral-900">{t.products.flashDeals}</h2>
+              <p className="text-sm text-neutral-500">{t.products.flashDealsDesc}</p>
             </div>
           </div>
-          <Link href="/deals" className="flex items-center gap-1 text-[#FF6A00] font-medium hover:underline">
-            View all deals
+          <Link href={`/${locale}/deals`} className="flex items-center gap-1 text-[#FF6A00] font-medium hover:underline">
+            {t.products.viewAllDeals}
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
@@ -148,12 +152,12 @@ export default function DesktopProducts() {
               <BadgeCheck className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-xl font-display font-bold text-neutral-900">Verified Suppliers</h2>
-              <p className="text-sm text-neutral-500">Trusted manufacturers with trade assurance</p>
+              <h2 className="text-xl font-display font-bold text-neutral-900">{t.products.verifiedSuppliers}</h2>
+              <p className="text-sm text-neutral-500">{t.products.suppliersDesc}</p>
             </div>
           </div>
-          <Link href="/suppliers" className="flex items-center gap-1 text-[#FF6A00] font-medium hover:underline">
-            View all suppliers
+          <Link href={`/${locale}/suppliers`} className="flex items-center gap-1 text-[#FF6A00] font-medium hover:underline">
+            {t.products.viewAllSuppliers}
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
@@ -167,17 +171,17 @@ export default function DesktopProducts() {
       {/* Promotional Banners */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-8 text-white">
-          <h3 className="text-2xl font-display font-bold mb-2">Free Shipping</h3>
-          <p className="text-green-100 mb-4">On orders over $1,000. Valid for new buyers only.</p>
-          <Link href="/products" className="inline-block bg-white text-green-700 px-6 py-2.5 rounded-lg font-semibold hover:bg-green-50 transition">
-            Shop Now
+          <h3 className="text-2xl font-display font-bold mb-2">{t.products.freeShipping}</h3>
+          <p className="text-green-100 mb-4">{t.products.freeShippingDesc}</p>
+          <Link href={`/${locale}/products`} className="inline-block bg-white text-green-700 px-6 py-2.5 rounded-lg font-semibold hover:bg-green-50 transition">
+            {t.products.shopNow}
           </Link>
         </div>
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
-          <h3 className="text-2xl font-display font-bold mb-2">Net-30 Terms</h3>
-          <p className="text-blue-100 mb-4">Buy now, pay in 30 days for qualified buyers.</p>
-          <Link href="/apply-terms" className="inline-block bg-white text-blue-700 px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition">
-            Apply Now
+          <h3 className="text-2xl font-display font-bold mb-2">{t.products.netTerms}</h3>
+          <p className="text-blue-100 mb-4">{t.products.netTermsDesc}</p>
+          <Link href={`/${locale}/apply-terms`} className="inline-block bg-white text-blue-700 px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition">
+            {t.products.applyNow}
           </Link>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { Home, Search, Package, MessageSquare, User } from "lucide-react";
 import { useState } from "react";
+import { useI18n } from "@/i18n/context";
 
 type NavItem = {
   id: string;
@@ -10,16 +11,17 @@ type NavItem = {
   dot?: boolean;
 };
 
-const ITEMS: NavItem[] = [
-  { id: "home",     label: "Home",     Icon: Home },
-  { id: "search",   label: "Search",   Icon: Search },
-  { id: "orders",   label: "Orders",   Icon: Package, dot: true },
-  { id: "messages", label: "Messages", Icon: MessageSquare },
-  { id: "account",  label: "Account",  Icon: User },
-];
-
 export default function BottomNav() {
+  const { t } = useI18n();
   const [active, setActive] = useState<string>("home");
+
+  const ITEMS: NavItem[] = [
+    { id: "home",     label: t.nav.home,     Icon: Home },
+    { id: "search",   label: t.nav.search,   Icon: Search },
+    { id: "orders",   label: t.nav.orders,   Icon: Package, dot: true },
+    { id: "messages", label: t.nav.messages, Icon: MessageSquare },
+    { id: "account",  label: t.nav.account,  Icon: User },
+  ];
 
   return (
     <nav className="bg-white border-t border-neutral-200 flex pt-2 pb-3.5">

@@ -4,29 +4,23 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Shield, Truck, Clock, BadgeCheck } from "lucide-react";
 import { flashDeals } from "./data";
+import { useI18n } from "@/i18n/context";
 
 export default function DesktopHero() {
+  const { t, locale } = useI18n();
   const [activeSlide, setActiveSlide] = useState(0);
 
   const heroSlides = [
-    {
-      title: "Global B2B Wholesale Marketplace",
-      subtitle: "Connect with 50,000+ verified suppliers. Source products at factory prices with trade assurance protection.",
-      cta: "Browse Suppliers",
-      bg: "from-[#FF6A00] to-[#FF8C00]",
-    },
-    {
-      title: "Flash Deals - Up to 70% Off",
-      subtitle: "Limited time wholesale prices on trending products. MOQ as low as 10 units.",
-      cta: "Shop Flash Deals",
-      bg: "from-[#FF6A00] to-[#FF8C00]",
-    },
-    {
-      title: "Request for Quotation",
-      subtitle: "Tell suppliers what you need. Get competitive quotes from multiple verified suppliers in 24 hours.",
-      cta: "Submit RFQ",
-      bg: "from-[#FF8C00] to-[#FF6A00]",
-    },
+    { title: t.hero.slide1Title, subtitle: t.hero.slide1Sub, cta: t.hero.slide1Cta, bg: "from-[#FF6A00] to-[#FF8C00]" },
+    { title: t.hero.slide2Title, subtitle: t.hero.slide2Sub, cta: t.hero.slide2Cta, bg: "from-[#FF6A00] to-[#FF8C00]" },
+    { title: t.hero.slide3Title, subtitle: t.hero.slide3Sub, cta: t.hero.slide3Cta, bg: "from-[#FF8C00] to-[#FF6A00]" },
+  ];
+
+  const trustBadges = [
+    { icon: Shield,      label: t.hero.tradeAssurance,   desc: t.hero.securePayment },
+    { icon: Truck,       label: t.hero.fastShipping,     desc: t.hero.globalDelivery },
+    { icon: Clock,       label: t.hero.support247,       desc: t.hero.alwaysAvailable },
+    { icon: BadgeCheck,  label: t.hero.verifiedSuppliers,desc: t.hero.qualityChecked },
   ];
 
   return (
@@ -35,7 +29,7 @@ export default function DesktopHero() {
         {/* Left sidebar - Categories */}
         <div className="col-span-2 bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
           <div className="p-3 bg-[#FF6A00] text-white font-semibold text-sm">
-            Browse Categories
+            {t.hero.browseCategories}
           </div>
           <div className="divide-y divide-neutral-100">
             {[
@@ -70,7 +64,7 @@ export default function DesktopHero() {
                   <div className="flex items-center gap-2 mb-4">
                     <BadgeCheck className="w-5 h-5" />
                     <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
-                      Verified Platform
+                      {t.hero.verifiedPlatform}
                     </span>
                   </div>
                   <h1 className="text-3xl font-display font-bold mb-4">
@@ -80,7 +74,7 @@ export default function DesktopHero() {
                     {heroSlides[activeSlide].subtitle}
                   </p>
                   <Link
-                    href="/products"
+                    href={`/${locale}/products`}
                     className="inline-flex items-center gap-2 bg-white text-[#FF6A00] px-6 py-3 rounded-lg font-semibold hover:bg-neutral-100 transition"
                   >
                     {heroSlides[activeSlide].cta}
@@ -106,12 +100,7 @@ export default function DesktopHero() {
 
           {/* Trust badges */}
           <div className="grid grid-cols-4 gap-4 mt-6">
-            {[
-              { icon: Shield, label: "Trade Assurance", desc: "Secure payment" },
-              { icon: Truck, label: "Fast Shipping", desc: "Global delivery" },
-              { icon: Clock, label: "24/7 Support", desc: "Always available" },
-              { icon: BadgeCheck, label: "Verified Suppliers", desc: "Quality checked" },
-            ].map(({ icon: Icon, label, desc }) => (
+            {trustBadges.map(({ icon: Icon, label, desc }) => (
               <div key={label} className="flex items-center gap-3 bg-white p-4 rounded-lg border border-neutral-200">
                 <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
                   <Icon className="w-5 h-5 text-[#FF6A00]" />
@@ -130,9 +119,9 @@ export default function DesktopHero() {
           {/* Flash deals card */}
           <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-neutral-900">Flash Deals</h3>
-              <Link href="/deals" className="text-sm text-[#FF6A00] hover:underline">
-                View all
+              <h3 className="font-semibold text-neutral-900">{t.hero.flashDealsTitle}</h3>
+              <Link href={`/${locale}/deals`} className="text-sm text-[#FF6A00] hover:underline">
+                {t.hero.viewAll}
               </Link>
             </div>
             <div className="space-y-3">
@@ -160,27 +149,23 @@ export default function DesktopHero() {
 
           {/* RFQ card */}
           <div className="bg-gradient-to-br from-[#FF6A00] to-[#FF8C00] rounded-xl p-4 text-white">
-            <h3 className="font-semibold mb-2">Request for Quotation</h3>
-            <p className="text-sm text-white/90 mb-4">
-              Get quotes from multiple suppliers for your custom requirements.
-            </p>
+            <h3 className="font-semibold mb-2">{t.hero.rfqTitle}</h3>
+            <p className="text-sm text-white/90 mb-4">{t.hero.rfqDesc}</p>
             <Link
-              href="/rfq"
+              href={`/${locale}/rfq`}
               className="block text-center bg-white text-[#FF6A00] py-2 rounded-lg font-semibold text-sm hover:bg-neutral-100 transition"
             >
-              Submit RFQ
+              {t.hero.submitRFQ}
             </Link>
           </div>
 
           {/* New user offer */}
           <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4 text-white">
-            <h3 className="font-semibold mb-2">New Buyer Offer</h3>
-            <p className="text-sm text-white/90 mb-3">
-              Get $50 off your first order over $500.
-            </p>
+            <h3 className="font-semibold mb-2">{t.hero.newBuyerOffer}</h3>
+            <p className="text-sm text-white/90 mb-3">{t.hero.newBuyerDesc}</p>
             <div className="flex items-center gap-2 bg-white/20 rounded-lg px-3 py-2">
               <span className="text-lg font-bold">NEW50</span>
-              <span className="text-xs text-white/80">Copy code</span>
+              <span className="text-xs text-white/80">{t.hero.copyCode}</span>
             </div>
           </div>
         </div>

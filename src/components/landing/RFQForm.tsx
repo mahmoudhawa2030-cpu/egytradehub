@@ -2,16 +2,18 @@
 
 import { useState, type FormEvent } from "react";
 import { ArrowUpRight, Loader2, CheckCircle2 } from "lucide-react";
+import { useI18n } from "@/i18n/context";
 
 type State = "idle" | "submitting" | "success" | "error";
 
 export default function RFQForm() {
+  const { t } = useI18n();
   const [state, setState] = useState<State>("idle");
   const [form, setForm] = useState({
     product: "",
     quantity: "",
     targetPrice: "",
-    country: "Egypt",
+    country: "",
     notes: "",
   });
 
@@ -30,7 +32,7 @@ export default function RFQForm() {
   return (
     <section className="mx-2.5 mt-2.5">
       <div className="flex items-center justify-between mb-2.5">
-        <h2 className="text-sm font-semibold text-neutral-900">Request a quote (RFQ)</h2>
+        <h2 className="text-sm font-semibold text-neutral-900">{t.rfqForm.title}</h2>
       </div>
 
       <form
@@ -38,61 +40,61 @@ export default function RFQForm() {
         className="bg-white rounded-2xl p-3.5 border border-neutral-200"
       >
         <p className="text-[11px] text-neutral-500 mb-3">
-          Tell suppliers exactly what you need — get responses in 24h.
+          {t.rfqForm.subtitle}
         </p>
 
         <div className="grid grid-cols-2 gap-2 mb-2">
-          <Field label="Product">
+          <Field label={t.rfqForm.productName}>
             <input
               required
               value={form.product}
               onChange={(e) => update("product", e.target.value)}
               type="text"
-              placeholder="e.g. HEPA filters"
+              placeholder={t.rfqForm.productPlaceholder}
               className={inputCls}
             />
           </Field>
-          <Field label="Quantity">
+          <Field label={t.rfqForm.quantity}>
             <input
               required
               min={1}
               value={form.quantity}
               onChange={(e) => update("quantity", e.target.value)}
               type="number"
-              placeholder="500"
+              placeholder={t.rfqForm.quantityPlaceholder}
               className={inputCls}
             />
           </Field>
         </div>
 
         <div className="grid grid-cols-2 gap-2 mb-2">
-          <Field label="Target price ($)">
+          <Field label={t.rfqForm.targetPrice}>
             <input
               value={form.targetPrice}
               onChange={(e) => update("targetPrice", e.target.value)}
               type="number"
               step="0.01"
-              placeholder="7.50"
+              placeholder={t.rfqForm.pricePlaceholder}
               className={inputCls}
             />
           </Field>
-          <Field label="Country">
+          <Field label={t.rfqForm.country}>
             <input
               value={form.country}
               onChange={(e) => update("country", e.target.value)}
               type="text"
-              placeholder="Egypt"
+              placeholder={t.rfqForm.countryPlaceholder}
               className={inputCls}
             />
           </Field>
         </div>
 
-        <Field label="Special requirements" className="mb-2.5">
+        <Field label={t.rfqForm.notes} className="mb-2.5">
           <textarea
             value={form.notes}
             onChange={(e) => update("notes", e.target.value)}
             rows={2}
-            placeholder="Certifications, packaging, lead time..."
+            placeholder={t.rfqForm.notesPlaceholder}
             className={`${inputCls} resize-none`}
           />
         </Field>
@@ -104,9 +106,7 @@ export default function RFQForm() {
         >
           {state === "submitting" && <Loader2 className="w-4 h-4 animate-spin" />}
           {state === "success" && <CheckCircle2 className="w-4 h-4" />}
-          {state === "success"
-            ? "RFQ submitted — we'll be in touch"
-            : "Submit RFQ — get quotes in 24h"}
+          {state === "success" ? t.rfqForm.success : t.rfqForm.submit}
           {state === "idle" && <ArrowUpRight className="w-4 h-4" />}
         </button>
       </form>

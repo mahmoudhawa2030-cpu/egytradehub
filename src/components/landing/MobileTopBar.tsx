@@ -6,8 +6,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { categoryTabs } from "./data";
 import { createClient } from "@/lib/supabase/client";
+import { useI18n } from "@/i18n/context";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function MobileTopBar() {
+  const { t, locale } = useI18n();
   const [active, setActive] = useState<string>("All");
   const [user, setUser] = useState<{ email?: string; id: string } | null>(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -49,6 +52,7 @@ export default function MobileTopBar() {
           </div>
         </Link>
         <div className="flex items-center gap-3">
+          <LanguageSwitcher className="text-white [&_button]:text-white [&_button:hover]:text-[#FFE566]" />
           <div className="relative">
             <Bell className="w-5 h-5 text-white" strokeWidth={1.8} />
             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#FFE566] border-[1.5px] border-[#FF6A00]" />
@@ -71,28 +75,28 @@ export default function MobileTopBar() {
                     <div className="px-4 py-2 border-b border-neutral-100">
                       <p className="text-sm font-medium text-neutral-900 truncate">{user.email}</p>
                     </div>
-                    <Link href="/account" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
-                      Account
+                    <Link href={`/${locale}/account`} className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
+                      {t.common.account}
                     </Link>
-                    <Link href="/orders" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
-                      My orders
+                    <Link href={`/${locale}/orders`} className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
+                      {t.common.myOrders}
                     </Link>
                     <button
                       onClick={signOut}
                       className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                     >
                       <LogOut className="w-4 h-4" />
-                      Sign out
+                      {t.common.signOut}
                     </button>
                   </div>
                 )}
               </>
             ) : (
               <Link
-                href="/login"
+                href={`/${locale}/login`}
                 className="text-white text-xs font-semibold px-3 py-1.5 bg-white/20 rounded-lg border border-white/30"
               >
-                Sign in
+                {t.common.signIn}
               </Link>
             )}
           </div>
@@ -104,7 +108,7 @@ export default function MobileTopBar() {
         <div className="flex-1 bg-white rounded-xl flex items-center gap-2 px-3 py-2 shadow-sm">
           <Search className="w-4 h-4 text-neutral-400" strokeWidth={2} />
           <span className="text-[12.5px] text-neutral-400 truncate">
-            Search 50,000+ wholesale products
+            {t.common.searchPlaceholder}
           </span>
         </div>
         <button

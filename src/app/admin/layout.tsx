@@ -84,7 +84,7 @@ export default async function AdminLayout({
         
         <div className="absolute bottom-0 w-64 p-4 border-t border-neutral-200 bg-white">
           <Link
-            href="/"
+            href="/en"
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-red-50 hover:text-red-600 transition"
           >
             <LogOut className="w-5 h-5" />

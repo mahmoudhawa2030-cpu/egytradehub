@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { useI18n } from "@/i18n/context";
 
 // Social icons as inline SVGs (Lucide doesn't have social media icons)
 const FacebookIcon = () => (
@@ -28,14 +29,16 @@ const InstagramIcon = () => (
   </svg>
 );
 
-const footerLinks = {
-  "For Buyers": ["Post RFQ", "Browse Categories", "Browse Suppliers", "Buyer Protection", "Logistics Service"],
-  "For Suppliers": ["Become a Supplier", "Supplier Membership", "Learning Center", "Trade Assurance"],
-  "Customer Service": ["Help Center", "Contact Us", "Report Abuse", "Submit a Dispute"],
-  "About Us": ["About TradeHub", "Careers", "Press", "Blog", "Sitemap"],
-};
-
 export default function DesktopFooter() {
+  const { t } = useI18n();
+
+  const footerLinks: Record<string, string[]> = {
+    [t.footer.forBuyers]: ["Post RFQ", "Browse Categories", "Browse Suppliers", "Buyer Protection", "Logistics Service"],
+    [t.footer.forSuppliers]: ["Become a Supplier", "Supplier Membership", "Learning Center", "Trade Assurance"],
+    [t.footer.customerService]: ["Help Center", "Contact Us", "Report Abuse", "Submit a Dispute"],
+    [t.footer.aboutUs]: ["About TradeHub", "Careers", "Press", "Blog", "Sitemap"],
+  };
+
   return (
     <footer className="bg-neutral-900 text-neutral-300">
       {/* Main footer */}
@@ -52,7 +55,7 @@ export default function DesktopFooter() {
               </span>
             </div>
             <p className="text-sm text-neutral-400 mb-4">
-              Global B2B wholesale marketplace connecting verified suppliers with buyers worldwide.
+              {t.footer.tagline}
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
@@ -91,17 +94,17 @@ export default function DesktopFooter() {
         <div className="mt-12 pt-8 border-t border-neutral-800">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-white font-semibold mb-1">Subscribe to our newsletter</h4>
-              <p className="text-sm text-neutral-400">Get the latest deals and industry news</p>
+              <h4 className="text-white font-semibold mb-1">{t.footer.newsletter}</h4>
+              <p className="text-sm text-neutral-400">{t.footer.newsletterDesc}</p>
             </div>
             <div className="flex gap-2">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t.footer.emailPlaceholder}
                 className="px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder:text-neutral-500 focus:outline-none focus:border-[#FF6A00] w-64"
               />
               <button className="px-6 py-2 bg-[#FF6A00] text-white font-semibold rounded-lg hover:bg-[#FF8C00] transition">
-                Subscribe
+                {t.footer.subscribe}
               </button>
             </div>
           </div>
@@ -113,7 +116,7 @@ export default function DesktopFooter() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-neutral-400">
-              © 2024 TradeHub. All rights reserved.
+              {t.footer.rights}
             </p>
             <div className="flex items-center gap-4">
               <Link href="/" className="p-2 hover:text-[#FF6A00] transition">

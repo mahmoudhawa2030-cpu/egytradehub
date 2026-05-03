@@ -18,11 +18,11 @@ export async function GET(request: Request) {
         .eq("user_id", data.user.id)
         .single();
 
-      let redirectTo = next;
+      let redirectTo = "/en";
       if (profile?.role === "admin") {
-        redirectTo = "/admin/dashboard";
+        redirectTo = "/en/admin/dashboard";
       } else if (profile?.role === "supplier") {
-        redirectTo = "/supplier/dashboard";
+        redirectTo = "/en/supplier/dashboard";
       }
 
       return NextResponse.redirect(`${origin}${redirectTo}`);
@@ -30,5 +30,5 @@ export async function GET(request: Request) {
   }
 
   // Return to home on error
-  return NextResponse.redirect(`${origin}/?error=auth_failed`);
+  return NextResponse.redirect(`${origin}/en?error=auth_failed`);
 }
