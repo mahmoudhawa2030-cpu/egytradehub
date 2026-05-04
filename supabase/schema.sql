@@ -157,105 +157,75 @@ alter table public.profiles add column if not exists is_banned boolean not null 
 -- 7. ADMIN POLICIES
 -- =============================================================
 
--- Admin can read all profiles
+-- Helper: SECURITY DEFINER function bypasses RLS to avoid recursion
+-- when a policy needs to check the caller's role from public.profiles.
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where user_id = auth.uid() and role = 'admin'
+  );
+$$;
+
+-- Allow callers to use it
+grant execute on function public.is_admin() to anon, authenticated;
+
+-- Admin can read all profiles (the public "select using (true)" policy
+-- already allows this; this admin policy is kept for clarity/explicitness
+-- but uses the non-recursive helper)
 drop policy if exists "Admins can view all profiles" on public.profiles;
 create policy "Admins can view all profiles" on public.profiles
-  for select using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for select using ( public.is_admin() );
 
 -- Admin can update any profile (role, is_verified)
 drop policy if exists "Admins can update any profile" on public.profiles;
 create policy "Admins can update any profile" on public.profiles
-  for update using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for update using ( public.is_admin() );
 
 -- Admin can read all products
 drop policy if exists "Admins can view all products" on public.products;
 create policy "Admins can view all products" on public.products
-  for select using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for select using ( public.is_admin() );
 
 -- Admin can insert products
 drop policy if exists "Admins can insert products" on public.products;
 create policy "Admins can insert products" on public.products
-  for insert with check (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for insert with check ( public.is_admin() );
 
 -- Admin can update any product
 drop policy if exists "Admins can update any product" on public.products;
 create policy "Admins can update any product" on public.products
-  for update using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for update using ( public.is_admin() );
 
 -- Admin can delete any product
 drop policy if exists "Admins can delete any product" on public.products;
 create policy "Admins can delete any product" on public.products
-  for delete using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for delete using ( public.is_admin() );
 
 -- Admin can read all RFQs
 drop policy if exists "Admins can view all RFQs" on public.rfqs;
 create policy "Admins can view all RFQs" on public.rfqs
-  for select using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for select using ( public.is_admin() );
 
 -- Admin can update any RFQ
 drop policy if exists "Admins can update any RFQ" on public.rfqs;
 create policy "Admins can update any RFQ" on public.rfqs
-  for update using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for update using ( public.is_admin() );
 
 -- Admin can read all orders
 drop policy if exists "Admins can view all orders" on public.orders;
 create policy "Admins can view all orders" on public.orders
-  for select using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for select using ( public.is_admin() );
 
 -- Admin can update any order
 drop policy if exists "Admins can update any order" on public.orders;
 create policy "Admins can update any order" on public.orders
-  for update using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for update using ( public.is_admin() );
 
 -- =============================================================
 -- 8. CATEGORIES
@@ -285,12 +255,7 @@ create policy "Categories are publicly readable" on public.categories
 -- Admins can do everything
 drop policy if exists "Admins can manage categories" on public.categories;
 create policy "Admins can manage categories" on public.categories
-  for all using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  for all using ( public.is_admin() );
 
 -- Seed default categories (idempotent)
 insert into public.categories (name, slug, icon, sort_order) values
