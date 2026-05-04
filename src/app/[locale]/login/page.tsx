@@ -41,13 +41,12 @@ export default function LoginPage() {
         .single();
 
       if (profile?.role === "admin") {
-        router.push(`/${locale}/admin/dashboard`);
+        window.location.href = "/admin/dashboard";
       } else if (profile?.role === "supplier") {
-        router.push(`/${locale}/supplier/dashboard`);
+        window.location.href = "/supplier/dashboard";
       } else {
-        router.push(`/${locale}`);
+        window.location.href = `/${locale}`;
       }
-      router.refresh();
     }
   }
 
