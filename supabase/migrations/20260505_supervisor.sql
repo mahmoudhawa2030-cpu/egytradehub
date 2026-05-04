@@ -3,7 +3,8 @@
 -- Run in Supabase SQL Editor
 -- ============================================================
 
--- 1. role column is plain text — no enum to alter. 'supervisor' works automatically.
+-- 1. Add 'supervisor' to the profile_role enum
+alter type public.profile_role add value if not exists 'supervisor';
 
 -- 2. Messages table (live chat between users + supervisor support)
 create table if not exists public.messages (
