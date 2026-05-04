@@ -47,8 +47,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Auth middleware ──────────────────────────────────────────
-  // /admin and /supplier have their own server-component auth guards — skip here.
-  if (pathname.startsWith("/admin") || pathname.startsWith("/supplier")) {
+  // /admin, /supplier, and /api have their own auth guards — skip here.
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/supplier") ||
+    pathname.startsWith("/api")
+  ) {
     return NextResponse.next({ request: { headers: request.headers } });
   }
 
