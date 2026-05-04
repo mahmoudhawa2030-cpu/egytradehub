@@ -42,6 +42,8 @@ export default function LoginPage() {
 
       if (profile?.role === "admin") {
         window.location.href = "/admin/dashboard";
+      } else if (profile?.role === "supervisor") {
+        window.location.href = "/supervisor/dashboard";
       } else if (profile?.role === "supplier") {
         window.location.href = "/supplier/dashboard";
       } else {

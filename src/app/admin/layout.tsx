@@ -36,6 +36,7 @@ const navItems = [
   { icon: ShoppingCart,    label: "Orders",     href: "/admin/orders" },
   { icon: MessageSquare,   label: "RFQs",       href: "/admin/rfqs" },
   { icon: Users,           label: "Users",      href: "/admin/users" },
+  { icon: Users,           label: "Supervisors", href: "/admin/supervisors" },
   { icon: BarChart3,       label: "Analytics",  href: "/admin/analytics" },
   { icon: Settings,        label: "Settings",   href: "/admin/settings" },
 ];
@@ -51,7 +52,7 @@ export default async function AdminLayout({
     redirect("/en/login");
   }
 
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "supervisor") {
     redirect("/en");
   }
 
