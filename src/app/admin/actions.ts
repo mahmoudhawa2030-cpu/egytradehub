@@ -178,10 +178,13 @@ export async function createCategory(formData: FormData) {
   const supabase = await createClient();
   const name = (formData.get("name") as string).trim();
   const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const parentId = (formData.get("parent_id") as string) || null;
   const { error } = await supabase.from("categories").insert({
     name,
     slug,
+    parent_id: parentId,
     icon: (formData.get("icon") as string) || null,
+    thumbnail_url: (formData.get("thumbnail_url") as string) || null,
     description: (formData.get("description") as string) || null,
     sort_order: parseInt(formData.get("sort_order") as string, 10) || 0,
     is_active: formData.get("is_active") !== "false",
@@ -195,10 +198,13 @@ export async function updateCategory(id: string, formData: FormData) {
   const supabase = await createClient();
   const name = (formData.get("name") as string).trim();
   const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const parentId = (formData.get("parent_id") as string) || null;
   const { error } = await supabase.from("categories").update({
     name,
     slug,
+    parent_id: parentId,
     icon: (formData.get("icon") as string) || null,
+    thumbnail_url: (formData.get("thumbnail_url") as string) || null,
     description: (formData.get("description") as string) || null,
     sort_order: parseInt(formData.get("sort_order") as string, 10) || 0,
     is_active: formData.get("is_active") === "true",

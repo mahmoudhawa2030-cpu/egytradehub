@@ -231,14 +231,16 @@ create policy "Admins can update any order" on public.orders
 -- 8. CATEGORIES
 -- =============================================================
 create table if not exists public.categories (
-  id   uuid primary key default gen_random_uuid(),
-  name text not null unique,
-  slug text not null unique,
-  icon text,
-  description text,
-  is_active boolean not null default true,
-  sort_order integer not null default 0,
-  created_at timestamptz not null default now()
+  id            uuid primary key default gen_random_uuid(),
+  parent_id     uuid references public.categories(id) on delete cascade,
+  name          text not null unique,
+  slug          text not null unique,
+  icon          text,
+  thumbnail_url text,
+  description   text,
+  is_active     boolean not null default true,
+  sort_order    integer not null default 0,
+  created_at    timestamptz not null default now()
 );
 
 create index if not exists categories_slug_idx    on public.categories(slug);

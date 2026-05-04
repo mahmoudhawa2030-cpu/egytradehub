@@ -5,7 +5,7 @@ export default async function CategoriesPage() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name, slug, icon, description, is_active, sort_order, created_at")
+    .select("id, name, slug, icon, thumbnail_url, description, is_active, sort_order, parent_id, created_at")
     .order("sort_order", { ascending: true });
 
   return (
