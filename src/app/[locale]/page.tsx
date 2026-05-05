@@ -21,7 +21,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const [categoriesRes, productsRes, flashRes] = await Promise.all([
     supabase
       .from("categories")
-      .select("id, name, slug, icon, thumbnail_url, is_active")
+      .select("id, name, slug, icon, thumbnail_url, is_active, parent_id")
       .eq("is_active", true)
       .order("sort_order", { ascending: true }),
     supabase
