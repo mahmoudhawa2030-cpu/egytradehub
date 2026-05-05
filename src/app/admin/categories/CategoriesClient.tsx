@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
+import IconPicker from "./IconPicker";
 import { Plus, Edit2, Trash2, X, ToggleLeft, ToggleRight, ChevronRight, ImagePlus, Loader2 } from "lucide-react";
 import {
   createCategory,
@@ -41,6 +42,7 @@ function CategoryModal({
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(editing?.thumbnail_url ?? null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(editing?.thumbnail_url ?? null);
+  const [selectedIcon, setSelectedIcon] = useState<string>(editing?.icon ?? "");
   const fileRef = useRef<HTMLInputElement>(null);
   const isEdit = !!editing;
 
@@ -62,6 +64,7 @@ function CategoryModal({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.set("thumbnail_url", uploadedUrl ?? "");
+    formData.set("icon", selectedIcon);
     if (isEdit) formData.set("is_active", editing!.is_active ? "true" : "false");
     startTransition(async () => {
       const result = isEdit
@@ -159,8 +162,9 @@ function CategoryModal({
           {/* Icon + Sort Order */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Icon (Lucide name)</label>
-              <input name="icon" defaultValue={editing?.icon ?? ""} placeholder="e.g. Hammer" className={inputCls} />
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Icon</label>
+              <IconPicker value={selectedIcon} onChange={setSelectedIcon} />
+              <input type="hidden" name="icon" value={selectedIcon} />
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Sort Order</label>
