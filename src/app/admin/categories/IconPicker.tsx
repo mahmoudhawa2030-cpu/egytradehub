@@ -4,7 +4,8 @@ import { useState, useMemo } from "react";
 import { Search, X, Check } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 
-type LucideIcon = React.ComponentType<{ className?: string }>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LucideIcon = (props: any) => React.ReactElement | null;
 
 const CATEGORY_ICONS: Record<string, string[]> = {
   "Industry & Trade": [
@@ -61,7 +62,7 @@ const CATEGORY_ICONS: Record<string, string[]> = {
 const ALL_ICONS = Array.from(new Set(Object.values(CATEGORY_ICONS).flat()));
 
 function resolveIcon(name: string): LucideIcon | null {
-  return (LucideIcons as Record<string, LucideIcon>)[name] ?? null;
+  return (LucideIcons as unknown as Record<string, LucideIcon>)[name] ?? null;
 }
 
 export default function IconPicker({
