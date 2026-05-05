@@ -143,6 +143,8 @@ export async function deleteProduct(productId: string) {
   const supabase = await createClient();
   await supabase.from("products").delete().eq("id", productId);
   revalidatePath("/admin/inventory");
+  revalidatePath("/", "layout");
+  revalidatePath("/[locale]/products", "page");
 }
 
 export async function createProduct(formData: FormData) {
@@ -168,6 +170,8 @@ export async function createProduct(formData: FormData) {
 
   if (error) return { error: error.message };
   revalidatePath("/admin/inventory");
+  revalidatePath("/", "layout");
+  revalidatePath("/[locale]/products", "page");
   return { success: true };
 }
 
@@ -194,6 +198,8 @@ export async function updateProduct(productId: string, formData: FormData) {
 
   if (error) return { error: error.message };
   revalidatePath("/admin/inventory");
+  revalidatePath("/", "layout");
+  revalidatePath("/[locale]/products", "page");
   return { success: true };
 }
 
