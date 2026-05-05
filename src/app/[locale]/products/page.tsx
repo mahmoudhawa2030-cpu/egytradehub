@@ -7,7 +7,7 @@ export default async function ProductsPage({ params }: { params: Promise<{ local
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, category, base_price, moq, image_url, is_flash_deal, profiles!supplier_id(full_name, company_name)")
+    .select("id, slug, name, category, base_price, moq, image_url, is_flash_deal, profiles!supplier_id(full_name, company_name)")
     .order("created_at", { ascending: false });
 
   const products = data ?? [];
@@ -41,7 +41,7 @@ export default async function ProductsPage({ params }: { params: Promise<{ local
               return (
                 <Link
                   key={product.id}
-                  href={`/${locale}/products/${product.id}`}
+                  href={`/${locale}/products/${product.slug ?? product.id}`}
                   className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow flex flex-col"
                 >
                   <div className="h-48 bg-neutral-100 flex items-center justify-center relative">

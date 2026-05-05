@@ -3,6 +3,7 @@ import { Package } from "lucide-react";
 
 type DbDeal = {
   id: string;
+  slug?: string | null;
   name: string;
   base_price: number;
   moq: number;
@@ -25,7 +26,7 @@ export default function FlashDealsScroll({ deals, locale }: { deals: DbDeal[]; l
         return (
           <Link
             key={d.id}
-            href={`/${locale}/products/${d.id}`}
+            href={`/${locale}/products/${d.slug ?? d.id}`}
             className="flex-shrink-0 w-[148px] bg-white rounded-2xl overflow-hidden border border-neutral-200"
           >
             <div className={`h-[90px] flex items-center justify-center relative overflow-hidden ${!d.image_url ? BG_CYCLE[i % BG_CYCLE.length] : ""}`}>

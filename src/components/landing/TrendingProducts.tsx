@@ -3,6 +3,7 @@ import { Heart, Package } from "lucide-react";
 
 type DbProduct = {
   id: string;
+  slug?: string | null;
   name: string;
   category: string;
   base_price: number;
@@ -29,7 +30,7 @@ export default function TrendingProducts({ products, locale }: { products: DbPro
           return (
             <Link
               key={p.id}
-              href={`/${locale}/products/${p.id}`}
+              href={`/${locale}/products/${p.slug ?? p.id}`}
               className="bg-white rounded-2xl overflow-hidden border border-neutral-200 cursor-pointer block"
             >
               <div className={`h-[102px] flex items-center justify-center relative overflow-hidden ${!p.image_url ? BG_CYCLE[i % BG_CYCLE.length] : ""}`}>

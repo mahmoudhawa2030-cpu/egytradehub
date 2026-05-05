@@ -7,6 +7,7 @@ import { useI18n } from "@/i18n/context";
 
 type DbProduct = {
   id: string;
+  slug?: string | null;
   name: string;
   category: string;
   base_price: number;
@@ -24,7 +25,7 @@ function ProductCard({ product, flashBadge }: { product: DbProduct; flashBadge?:
   const priceLow = discount > 0 ? Number(product.base_price) * (1 - discount / 100) : Number(product.base_price);
 
   return (
-    <Link href={`/${locale}/products/${product.id}`} className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+    <Link href={`/${locale}/products/${product.slug ?? product.id}`} className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
       <div className="h-48 bg-neutral-100 flex items-center justify-center relative overflow-hidden">
         {product.image_url ? (
           <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />

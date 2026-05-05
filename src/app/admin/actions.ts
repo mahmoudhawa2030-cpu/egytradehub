@@ -4,6 +4,30 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { slugify } from "@/lib/slugify";
+
+// Generate a unique product slug by appending -2, -3, ... if needed.
+// Pass excludeId to skip a row when updating an existing product.
+async function generateUniqueProductSlug(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  name: string,
+  excludeId?: string,
+): Promise<string> {
+  const base = slugify(name);
+  let candidate = base;
+  let n = 2;
+  // cap attempts defensively
+  for (let i = 0; i < 50; i++) {
+    let q = supabase.from("products").select("id").eq("slug", candidate).limit(1);
+    if (excludeId) q = q.neq("id", excludeId);
+    const { data, error } = await q;
+    if (error) throw error;
+    if (!data || data.length === 0) return candidate;
+    candidate = `${base}-${n++}`;
+  }
+  // fallback: timestamp suffix to guarantee uniqueness
+  return `${base}-${Date.now()}`;
+}
 
 // ── Category Thumbnail Upload ─────────────────────────────────
 export async function uploadCategoryThumbnail(formData: FormData): Promise<{ url: string } | { error: string }> {
@@ -152,9 +176,13 @@ export async function createProduct(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  const name = formData.get("name") as string;
+  const slug = await generateUniqueProductSlug(supabase, name);
+
   const { error } = await supabase.from("products").insert({
     supplier_id: user.id,
-    name: formData.get("name") as string,
+    name,
+    slug,
     description: formData.get("description") as string,
     category: formData.get("category") as string,
     base_price: parseFloat(formData.get("base_price") as string),
@@ -178,10 +206,25 @@ export async function createProduct(formData: FormData) {
 export async function updateProduct(productId: string, formData: FormData) {
   const supabase = await createClient();
 
+  const name = formData.get("name") as string;
+
+  // Check current slug to decide whether to regenerate
+  const { data: existing } = await supabase
+    .from("products")
+    .select("name, slug")
+    .eq("id", productId)
+    .maybeSingle();
+
+  let slug = existing?.slug as string | undefined;
+  if (!slug || existing?.name !== name) {
+    slug = await generateUniqueProductSlug(supabase, name, productId);
+  }
+
   const { error } = await supabase
     .from("products")
     .update({
-      name: formData.get("name") as string,
+      name,
+      slug,
       description: formData.get("description") as string,
       category: formData.get("category") as string,
       base_price: parseFloat(formData.get("base_price") as string),
