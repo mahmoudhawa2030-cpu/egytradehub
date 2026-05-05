@@ -1,11 +1,52 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, X, Check } from "lucide-react";
-import * as LucideIcons from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Search, X, Check,
+  Factory, Warehouse, Package, PackageOpen, PackageCheck, Boxes, Box,
+  Truck, Ship, Plane, Train, HardHat, Wrench, Hammer, Drill, Cog, Settings, Settings2,
+  Zap, Battery, Gauge, Thermometer, CircuitBoard,
+  Building, Building2, Landmark, Home, Castle, School,
+  Layers, Ruler, PenTool, Pencil, Compass, Map, MapPin, Mountain, Pickaxe,
+  Leaf, TreePine, Trees, Flower, Sprout, Sun, Droplets, Wind, Flame, Snowflake, Diamond, Gem,
+  Blocks, Shapes, Circle, Square, Triangle,
+  Monitor, Laptop, Tablet, Smartphone, Tv, Radio, Wifi, Bluetooth,
+  HardDrive, Database, Server, Network, Router, Plug,
+  Apple, Cherry, Banana, Carrot, Wheat, UtensilsCrossed, ChefHat, Coffee, Cookie, Fish, Egg,
+  FlaskConical, TestTube, Microscope,
+  ShieldCheck, Shield, ShieldAlert, HeartPulse, Heart, Activity,
+  Stethoscope, Pill, Syringe, Bandage, Cross, Ambulance, Glasses, Eye, Hand,
+  Briefcase, BarChart, BarChart2, BarChart3, LineChart, PieChart,
+  TrendingUp, TrendingDown, DollarSign, CreditCard, Wallet, Coins, Banknote,
+  Receipt, ShoppingCart, Store, Tag, Tags,
+  Car, Bus, Bike, Anchor, Navigation, Route, Globe, Globe2,
+  ArrowLeftRight, ArrowUpDown, PackageSearch, Scan, QrCode,
+  Shirt, Scissors, ShoppingBag, Watch, Crown, Star, Sparkles, Palette, Paintbrush,
+  Atom, Biohazard, Dna, Bug,
+} from "lucide-react";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type LucideIcon = (props: any) => React.ReactElement | null;
+const ICON_MAP: Record<string, LucideIcon> = {
+  Factory, Warehouse, Package, PackageOpen, PackageCheck, Boxes, Box,
+  Truck, Ship, Plane, Train, HardHat, Wrench, Hammer, Drill, Cog, Settings, Settings2,
+  Zap, Battery, Gauge, Thermometer, CircuitBoard,
+  Building, Building2, Landmark, Home, Castle, School,
+  Layers, Ruler, PenTool, Pencil, Compass, Map, MapPin, Mountain, Pickaxe,
+  Leaf, TreePine, Trees, Flower, Sprout, Sun, Droplets, Wind, Flame, Snowflake, Diamond, Gem,
+  Blocks, Shapes, Circle, Square, Triangle,
+  Monitor, Laptop, Tablet, Smartphone, Tv, Radio, Wifi, Bluetooth,
+  HardDrive, Database, Server, Network, Router, Plug,
+  Apple, Cherry, Banana, Carrot, Wheat, UtensilsCrossed, ChefHat, Coffee, Cookie, Fish, Egg,
+  FlaskConical, TestTube, Microscope,
+  ShieldCheck, Shield, ShieldAlert, HeartPulse, Heart, Activity,
+  Stethoscope, Pill, Syringe, Bandage, Cross, Ambulance, Glasses, Eye, Hand,
+  Briefcase, BarChart, BarChart2, BarChart3, LineChart, PieChart,
+  TrendingUp, TrendingDown, DollarSign, CreditCard, Wallet, Coins, Banknote,
+  Receipt, ShoppingCart, Store, Tag, Tags,
+  Car, Bus, Bike, Anchor, Navigation, Route, Globe, Globe2,
+  ArrowLeftRight, ArrowUpDown, PackageSearch, Scan, QrCode,
+  Shirt, Scissors, ShoppingBag, Watch, Crown, Star, Sparkles, Palette, Paintbrush,
+  Atom, Biohazard, Dna, Bug,
+};
 
 const CATEGORY_ICONS: Record<string, string[]> = {
   "Industry & Trade": [
@@ -59,10 +100,10 @@ const CATEGORY_ICONS: Record<string, string[]> = {
   ],
 };
 
-const ALL_ICONS = Array.from(new Set(Object.values(CATEGORY_ICONS).flat()));
+const ALL_ICONS = Array.from(new Set(Object.values(CATEGORY_ICONS).flat())).filter(n => n in ICON_MAP);
 
 function resolveIcon(name: string): LucideIcon | null {
-  return (LucideIcons as unknown as Record<string, LucideIcon>)[name] ?? null;
+  return ICON_MAP[name] ?? null;
 }
 
 export default function IconPicker({
