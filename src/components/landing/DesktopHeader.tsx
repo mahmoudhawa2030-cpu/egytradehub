@@ -7,20 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/i18n/context";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-const categoryNav = [
-  "Consumer Electronics",
-  "Apparel & Fashion",
-  "Home & Garden",
-  "Beauty & Personal Care",
-  "Sports & Entertainment",
-  "Machinery",
-  "Automotive Parts",
-  "Health & Medical",
-  "Packaging & Printing",
-  "Gifts & Crafts",
-];
+type DbCategory = { id: string; name: string; slug: string; parent_id: string | null };
 
-export default function DesktopHeader() {
+export default function DesktopHeader({ categories = [] }: { categories?: DbCategory[] }) {
+  const topLevel = categories.filter((c) => c.parent_id === null);
   const { t, locale } = useI18n();
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,13 +142,13 @@ export default function DesktopHeader() {
               <ChevronDown className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-1 ml-4">
-              {categoryNav.slice(0, 7).map((cat) => (
+              {topLevel.slice(0, 7).map((cat) => (
                 <Link
-                  key={cat}
-                  href={`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`}
+                  key={cat.id}
+                  href={`/${locale}/products?category=${encodeURIComponent(cat.name)}`}
                   className="px-4 py-3 text-sm text-neutral-700 hover:text-[#FF6A00] hover:bg-neutral-50 transition"
                 >
-                  {cat}
+                  {cat.name}
                 </Link>
               ))}
             </div>
@@ -177,19 +167,18 @@ export default function DesktopHeader() {
         <div className="absolute left-0 right-0 bg-white shadow-xl border-t border-neutral-200 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-4 gap-8">
-              {categoryNav.map((cat) => (
+              {topLevel.map((cat) => (
                 <Link
-                  key={cat}
-                  href={`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`}
+                  key={cat.id}
+                  href={`/${locale}/products?category=${encodeURIComponent(cat.name)}`}
                   className="group"
                 >
                   <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition">
                     <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center group-hover:from-[#FF6A00] group-hover:to-[#FF8C00] transition">
-                      <span className="text-[#FF6A00] group-hover:text-white font-bold text-xs">{cat.slice(0, 2).toUpperCase()}</span>
+                      <span className="text-[#FF6A00] group-hover:text-white font-bold text-xs">{cat.name.slice(0, 2).toUpperCase()}</span>
                     </div>
                     <div>
-                      <p className="font-medium text-neutral-900 group-hover:text-[#FF6A00] transition">{cat}</p>
-                      <p className="text-xs text-neutral-500">12,000+ products</p>
+                      <p className="font-medium text-neutral-900 group-hover:text-[#FF6A00] transition">{cat.name}</p>
                     </div>
                   </div>
                 </Link>

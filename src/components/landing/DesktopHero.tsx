@@ -6,7 +6,10 @@ import { ArrowRight, Shield, Truck, Clock, BadgeCheck } from "lucide-react";
 import { flashDeals } from "./data";
 import { useI18n } from "@/i18n/context";
 
-export default function DesktopHero() {
+type DbCategory = { id: string; name: string; slug: string; parent_id: string | null };
+
+export default function DesktopHero({ categories = [] }: { categories?: DbCategory[] }) {
+  const topLevel = categories.filter((c) => c.parent_id === null);
   const { t, locale } = useI18n();
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -32,26 +35,18 @@ export default function DesktopHero() {
             {t.hero.browseCategories}
           </div>
           <div className="divide-y divide-neutral-100">
-            {[
-              "Consumer Electronics",
-              "Apparel & Fashion",
-              "Home & Garden",
-              "Beauty & Personal Care",
-              "Sports & Entertainment",
-              "Machinery",
-              "Automotive Parts",
-              "Health & Medical",
-              "Packaging & Printing",
-              "Gifts & Crafts",
-            ].map((cat) => (
+            {(topLevel.length > 0 ? topLevel : []).map((cat) => (
               <Link
-                key={cat}
-                href={`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`}
+                key={cat.id}
+                href={`/${locale}/products?category=${encodeURIComponent(cat.name)}`}
                 className="block px-3 py-2.5 text-sm text-neutral-700 hover:bg-orange-50 hover:text-[#FF6A00] transition"
               >
-                {cat}
+                {cat.name}
               </Link>
             ))}
+            {topLevel.length === 0 && (
+              <p className="px-3 py-4 text-xs text-neutral-400">No categories yet</p>
+            )}
           </div>
         </div>
 

@@ -80,8 +80,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <h1 className="sr-only">
           TradeHub — B2B wholesale marketplace with flash deals, verified suppliers, and RFQ engine.
         </h1>
-        <DesktopHeader />
-        <DesktopHero />
+        <DesktopHeader categories={categories} />
+        <DesktopHero categories={categories} />
         <DesktopProducts trending={products} flashDeals={flashDeals} />
         <DesktopFooter />
       </div>
