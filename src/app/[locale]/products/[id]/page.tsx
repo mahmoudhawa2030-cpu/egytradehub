@@ -3,8 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Zap, ArrowLeft } from "lucide-react";
 
-export default async function ProductDetailPage({ params }: { params: { locale: string; id: string } }) {
-  const { locale, id } = params;
+export default async function ProductDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
+  const { locale, id } = await params;
   const supabase = await createClient();
 
   const { data: product, error } = await supabase
