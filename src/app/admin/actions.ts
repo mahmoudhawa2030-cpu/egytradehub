@@ -53,6 +53,30 @@ export async function uploadCategoryThumbnail(formData: FormData): Promise<{ url
   return { url: publicUrl };
 }
 
+// ── Product Image Upload ──────────────────────────────────────
+export async function uploadProductImage(formData: FormData): Promise<{ url: string } | { error: string }> {
+  const file = formData.get("file") as File | null;
+  if (!file || file.size === 0) return { error: "No file provided" };
+  if (file.size > 5 * 1024 * 1024) return { error: "File must be under 5 MB" };
+  if (!file.type.startsWith("image/")) return { error: "Only image files are allowed" };
+
+  const supabase = createAdminClient();
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from("product-images")
+    .upload(path, file, { contentType: file.type, upsert: false });
+
+  if (error) return { error: error.message };
+
+  const { data: { publicUrl } } = supabase.storage
+    .from("product-images")
+    .getPublicUrl(path);
+
+  return { url: publicUrl };
+}
+
 // ── Suppliers ────────────────────────────────────────────────
 export async function verifySupplier(userId: string) {
   const supabase = await createClient();

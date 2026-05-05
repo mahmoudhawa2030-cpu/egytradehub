@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Zap } from "lucide-react";
 import { updateProduct } from "@/app/admin/actions";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 
 interface Product {
   id: string;
@@ -80,29 +81,19 @@ export default function EditProductForm({ product, categories }: { product: Prod
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">Category *</label>
-              <select
-                name="category"
-                required
-                defaultValue={product.category}
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
-              >
-                {categories.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">Image URL</label>
-              <input
-                name="image_url"
-                type="url"
-                defaultValue={product.image_url ?? ""}
-                placeholder="https://..."
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">Category *</label>
+            <select
+              name="category"
+              required
+              defaultValue={product.category}
+              className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
+            >
+              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
+
+          <ImageUploadField defaultUrl={product.image_url} />
 
           <div className="grid grid-cols-2 gap-4">
             <div>
