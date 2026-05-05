@@ -203,7 +203,7 @@ export async function createCategory(formData: FormData) {
   const name = (formData.get("name") as string).trim();
   const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   const parentId = (formData.get("parent_id") as string) || null;
-  const { error } = await supabase.from("categories").insert({
+  const { data, error } = await supabase.from("categories").insert({
     name,
     slug,
     parent_id: parentId,
@@ -212,10 +212,10 @@ export async function createCategory(formData: FormData) {
     description: (formData.get("description") as string) || null,
     sort_order: parseInt(formData.get("sort_order") as string, 10) || 0,
     is_active: formData.get("is_active") !== "false",
-  });
+  }).select().single();
   if (error) return { error: error.message };
   revalidatePath("/admin/categories");
-  return { success: true };
+  return { success: true, category: data };
 }
 
 export async function updateCategory(id: string, formData: FormData) {
@@ -223,7 +223,7 @@ export async function updateCategory(id: string, formData: FormData) {
   const name = (formData.get("name") as string).trim();
   const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   const parentId = (formData.get("parent_id") as string) || null;
-  const { error } = await supabase.from("categories").update({
+  const { data, error } = await supabase.from("categories").update({
     name,
     slug,
     parent_id: parentId,
@@ -232,10 +232,10 @@ export async function updateCategory(id: string, formData: FormData) {
     description: (formData.get("description") as string) || null,
     sort_order: parseInt(formData.get("sort_order") as string, 10) || 0,
     is_active: formData.get("is_active") === "true",
-  }).eq("id", id);
+  }).eq("id", id).select().single();
   if (error) return { error: error.message };
   revalidatePath("/admin/categories");
-  return { success: true };
+  return { success: true, category: data };
 }
 
 export async function deleteCategory(id: string) {

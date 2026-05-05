@@ -30,10 +30,12 @@ const inputCls =
 // ── Category Form Modal ─────────────────────────────────────────
 function CategoryModal({
   onClose,
+  onSaved,
   parents,
   editing,
 }: {
   onClose: () => void;
+  onSaved: (cat: Category) => void;
   parents: Category[];
   editing?: Category;
 }) {
@@ -70,7 +72,8 @@ function CategoryModal({
       const result = isEdit
         ? await updateCategory(editing!.id, formData)
         : await createCategory(formData);
-      if (result?.error) setError(result.error);
+      if (result?.error) { setError(result.error); return; }
+      if (result?.category) onSaved(result.category as Category);
       else onClose();
     });
   }
@@ -303,16 +306,27 @@ function CategoryRow({
 }
 
 // ── Main Component ──────────────────────────────────────────────
-export default function CategoriesClient({ categories }: { categories: Category[] }) {
+export default function CategoriesClient({ categories: initial }: { categories: Category[] }) {
+  const [categories, setCategories] = useState<Category[]>(initial);
   const [modal, setModal] = useState<{ open: boolean; editing?: Category }>({ open: false });
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  function handleSaved(updated: Category) {
+    setCategories((prev) => {
+      const exists = prev.find((c) => c.id === updated.id);
+      if (exists) return prev.map((c) => c.id === updated.id ? updated : c);
+      return [...prev, updated];
+    });
+    setModal({ open: false });
+  }
 
   function handleDelete(id: string) {
     if (!confirm("Delete this category and all its subcategories?")) return;
     setDeletingId(id);
     startTransition(async () => {
       await deleteCategory(id);
+      setCategories((prev) => prev.filter((c) => c.id !== id && c.parent_id !== id));
       setDeletingId(null);
     });
   }
@@ -320,6 +334,7 @@ export default function CategoriesClient({ categories }: { categories: Category[
   function handleToggle(id: string, current: boolean) {
     startTransition(async () => {
       await toggleCategoryActive(id, !current);
+      setCategories((prev) => prev.map((c) => c.id === id ? { ...c, is_active: !current } : c));
     });
   }
 
@@ -331,6 +346,7 @@ export default function CategoriesClient({ categories }: { categories: Category[
       {modal.open && (
         <CategoryModal
           onClose={() => setModal({ open: false })}
+          onSaved={handleSaved}
           parents={categories}
           editing={modal.editing}
         />
