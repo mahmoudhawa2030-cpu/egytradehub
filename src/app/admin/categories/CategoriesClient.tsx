@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Plus, Edit2, Trash2, Check, X, ToggleLeft, ToggleRight, ChevronRight } from "lucide-react";
+import { useState, useTransition, useRef } from "react";
+import { Plus, Edit2, Trash2, X, ToggleLeft, ToggleRight, ChevronRight, ImagePlus, Loader2 } from "lucide-react";
 import {
   createCategory,
   updateCategory,
   deleteCategory,
   toggleCategoryActive,
+  uploadCategoryThumbnail,
 } from "@/app/admin/actions";
 
 type Category = {
@@ -37,11 +38,30 @@ function CategoryModal({
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(editing?.thumbnail_url ?? null);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(editing?.thumbnail_url ?? null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const isEdit = !!editing;
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreviewUrl(URL.createObjectURL(file));
+    setUploading(true);
+    setError(null);
+    const fd = new FormData();
+    fd.append("file", file);
+    const result = await uploadCategoryThumbnail(fd);
+    setUploading(false);
+    if ("error" in result) { setError(result.error); setPreviewUrl(editing?.thumbnail_url ?? null); return; }
+    setUploadedUrl(result.url);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    formData.set("thumbnail_url", uploadedUrl ?? "");
     if (isEdit) formData.set("is_active", editing!.is_active ? "true" : "false");
     startTransition(async () => {
       const result = isEdit
@@ -93,23 +113,47 @@ function CategoryModal({
             <input name="name" required defaultValue={editing?.name ?? ""} placeholder="e.g. Industrial Pumps" className={inputCls} />
           </div>
 
-          {/* Thumbnail */}
+          {/* Thumbnail upload */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Thumbnail URL</label>
-            <input
-              name="thumbnail_url"
-              type="url"
-              defaultValue={editing?.thumbnail_url ?? ""}
-              placeholder="https://example.com/image.jpg"
-              className={inputCls}
-            />
-            {editing?.thumbnail_url && (
-              <img
-                src={editing.thumbnail_url}
-                alt="thumbnail"
-                className="mt-2 h-16 w-24 object-cover rounded-lg border border-neutral-200"
-              />
-            )}
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Thumbnail Image</label>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+            <div
+              onClick={() => !uploading && fileRef.current?.click()}
+              className={`relative flex items-center gap-4 p-3 border-2 border-dashed rounded-xl cursor-pointer transition ${
+                uploading ? "opacity-60 cursor-wait" : "hover:border-[#FF6A00] hover:bg-orange-50"
+              } border-neutral-200`}
+            >
+              {previewUrl ? (
+                <img src={previewUrl} alt="preview" className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-neutral-200" />
+              ) : (
+                <div className="w-16 h-16 rounded-lg bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                  <ImagePlus className="w-6 h-6 text-neutral-400" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                {uploading ? (
+                  <div className="flex items-center gap-2 text-sm text-neutral-500">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Uploading...
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-neutral-700">
+                      {previewUrl ? "Change image" : "Click to upload"}
+                    </p>
+                    <p className="text-xs text-neutral-400 mt-0.5">PNG, JPG, WebP · max 2 MB</p>
+                  </>
+                )}
+              </div>
+              {previewUrl && !uploading && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setPreviewUrl(null); setUploadedUrl(null); }}
+                  className="p-1 hover:bg-neutral-200 rounded-full transition flex-shrink-0"
+                >
+                  <X className="w-4 h-4 text-neutral-500" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Icon + Sort Order */}
@@ -136,6 +180,7 @@ function CategoryModal({
             />
           </div>
 
+          <input type="hidden" name="thumbnail_url" value={uploadedUrl ?? ""} />
           {!isEdit && <input type="hidden" name="is_active" value="true" />}
 
           <div className="flex justify-end gap-3 pt-2">
