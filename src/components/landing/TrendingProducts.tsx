@@ -1,63 +1,67 @@
+import Link from "next/link";
 import { Heart, Package } from "lucide-react";
-import { trendingProducts } from "./data";
 
-const TONE_MAP = {
-  hot:  "bg-orange-100 text-orange-800",
-  new:  "bg-green-100 text-green-800",
-  deal: "bg-amber-100 text-amber-800",
-} as const;
+type DbProduct = {
+  id: string;
+  name: string;
+  category: string;
+  base_price: number;
+  moq: number;
+  image_url: string | null;
+  is_flash_deal: boolean;
+  profiles?: { full_name?: string; company_name?: string } | null;
+};
 
-export default function TrendingProducts() {
+const BG_CYCLE = ["bg-orange-100", "bg-green-100", "bg-blue-100", "bg-purple-100", "bg-yellow-100", "bg-pink-100"];
+
+export default function TrendingProducts({ products, locale }: { products: DbProduct[]; locale: string }) {
+  if (!products.length) return null;
+
   return (
     <section className="mx-2.5 mt-2.5">
       <div className="flex items-center justify-between mb-2.5">
         <h2 className="text-sm font-semibold text-neutral-900">Trending now</h2>
-        <button className="text-xs text-[#FF6A00] font-medium">See all ›</button>
+        <Link href={`/${locale}/products`} className="text-xs text-[#FF6A00] font-medium">See all ›</Link>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {trendingProducts.map((p) => (
-          <article
-            key={p.id}
-            className="bg-white rounded-2xl overflow-hidden border border-neutral-200 cursor-pointer"
-          >
-            <div className={`h-[102px] flex items-center justify-center relative ${p.bg}`}>
-              {p.badge && (
-                <span
-                  className={`absolute top-1.5 left-1.5 text-[9.5px] px-1.5 py-0.5 rounded font-semibold ${TONE_MAP[p.badge.tone]}`}
-                >
-                  {p.badge.label}
-                </span>
-              )}
-              <button
-                aria-label="Save"
-                className="absolute top-1.5 right-1.5 w-6 h-6 bg-white/95 rounded-full flex items-center justify-center shadow"
-              >
-                <Heart className="w-3 h-3 text-[#FF6A00]" strokeWidth={2} />
-              </button>
-              <Package className="w-10 h-10 text-neutral-500/60" strokeWidth={1.5} />
-            </div>
-            <div className="px-2.5 py-2">
-              <div className="text-[11.5px] text-neutral-900 leading-snug line-clamp-2 mb-1 min-h-[2.6em]">
-                {p.name}
-              </div>
-              <div className="text-sm font-semibold text-[#FF6A00]">
-                ${p.basePrice}
-              </div>
-              <div className="text-[10.5px] text-neutral-400">
-                ${p.priceLow} – ${p.priceHigh} / unit
-              </div>
-              <div className="text-[10px] text-neutral-500 mt-0.5">MOQ {p.moq} units</div>
-              <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-neutral-100">
-                <span className="text-[10px] text-neutral-500 truncate flex-1">{p.supplier}</span>
-                {p.verified && (
-                  <span className="text-[9.5px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-semibold flex-shrink-0">
-                    Verified
+        {products.map((p, i) => {
+          const supplier = p.profiles?.company_name ?? p.profiles?.full_name ?? "Supplier";
+          return (
+            <Link
+              key={p.id}
+              href={`/${locale}/products/${p.id}`}
+              className="bg-white rounded-2xl overflow-hidden border border-neutral-200 cursor-pointer block"
+            >
+              <div className={`h-[102px] flex items-center justify-center relative overflow-hidden ${!p.image_url ? BG_CYCLE[i % BG_CYCLE.length] : ""}`}>
+                {p.is_flash_deal && (
+                  <span className="absolute top-1.5 left-1.5 text-[9.5px] px-1.5 py-0.5 rounded font-semibold bg-[#FF6A00] text-white z-10">
+                    Flash
                   </span>
                 )}
+                <span className="absolute top-1.5 right-1.5 w-6 h-6 bg-white/95 rounded-full flex items-center justify-center shadow z-10">
+                  <Heart className="w-3 h-3 text-[#FF6A00]" strokeWidth={2} />
+                </span>
+                {p.image_url ? (
+                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Package className="w-10 h-10 text-neutral-500/60" strokeWidth={1.5} />
+                )}
               </div>
-            </div>
-          </article>
-        ))}
+              <div className="px-2.5 py-2">
+                <div className="text-[11.5px] text-neutral-900 leading-snug line-clamp-2 mb-1 min-h-[2.6em]">
+                  {p.name}
+                </div>
+                <div className="text-sm font-semibold text-[#FF6A00]">
+                  ${Number(p.base_price).toLocaleString()}
+                </div>
+                <div className="text-[10px] text-neutral-500 mt-0.5">MOQ {p.moq} units</div>
+                <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-neutral-100">
+                  <span className="text-[10px] text-neutral-500 truncate flex-1">{supplier}</span>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

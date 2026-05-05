@@ -15,13 +15,29 @@ import DesktopProducts from "@/components/landing/DesktopProducts";
 import DesktopFooter from "@/components/landing/DesktopFooter";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function HomePage() {
+export default async function HomePage({ params: { locale } }: { params: { locale: string } }) {
   const supabase = await createClient();
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("id, name, slug, icon, thumbnail_url, is_active")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
+  const [categoriesRes, productsRes, flashRes] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("id, name, slug, icon, thumbnail_url, is_active")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("products")
+      .select("id, name, category, base_price, moq, image_url, is_flash_deal, flash_discount_pct, profiles!supplier_id(full_name, company_name)")
+      .order("created_at", { ascending: false })
+      .limit(8),
+    supabase
+      .from("products")
+      .select("id, name, category, base_price, moq, image_url, is_flash_deal, flash_discount_pct, profiles!supplier_id(full_name, company_name)")
+      .eq("is_flash_deal", true)
+      .order("created_at", { ascending: false })
+      .limit(8),
+  ]);
+  const categories = categoriesRes.data ?? [];
+  const products = (productsRes.data ?? []) as any[];
+  const flashDeals = (flashRes.data ?? []) as any[];
   return (
     <>
       {/* MOBILE LAYOUT */}
@@ -37,11 +53,11 @@ export default async function HomePage() {
             <div className="bg-[#f2f0ec] pb-2">
               <HeroBanner />
               <FlashDealsBar />
-              <FlashDealsScroll />
+              <FlashDealsScroll deals={flashDeals} locale={locale} />
               <div className="h-2 bg-[#e8e5e0] mt-2.5" />
               <CategoryGrid categories={categories ?? []} />
               <div className="h-2 bg-[#e8e5e0] mt-2.5" />
-              <TrendingProducts />
+              <TrendingProducts products={products} locale={locale} />
               <div className="h-2 bg-[#e8e5e0] mt-2.5" />
               <PromoGrid />
               <div className="h-2 bg-[#e8e5e0] mt-2.5" />
@@ -65,7 +81,7 @@ export default async function HomePage() {
         </h1>
         <DesktopHeader />
         <DesktopHero />
-        <DesktopProducts />
+        <DesktopProducts trending={products} flashDeals={flashDeals} />
         <DesktopFooter />
       </div>
     </>

@@ -1,26 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, BadgeCheck, ShoppingCart, Heart, TrendingUp } from "lucide-react";
-import { trendingProducts, topSuppliers, TrendingProduct, Supplier } from "./data";
+import { ChevronRight, BadgeCheck, ShoppingCart, Heart, TrendingUp, Package } from "lucide-react";
+import { topSuppliers, Supplier } from "./data";
 import { useI18n } from "@/i18n/context";
 
-function ProductCard({ product }: { product: TrendingProduct }) {
+type DbProduct = {
+  id: string;
+  name: string;
+  category: string;
+  base_price: number;
+  moq: number;
+  image_url: string | null;
+  is_flash_deal: boolean;
+  flash_discount_pct?: number | null;
+  profiles?: { full_name?: string; company_name?: string } | null;
+};
+
+function ProductCard({ product, flashBadge }: { product: DbProduct; flashBadge?: boolean }) {
   const { t, locale } = useI18n();
+  const supplier = product.profiles?.company_name ?? product.profiles?.full_name ?? "Supplier";
+  const discount = product.flash_discount_pct ? Number(product.flash_discount_pct) : 0;
+  const priceLow = discount > 0 ? Number(product.base_price) * (1 - discount / 100) : Number(product.base_price);
+
   return (
     <Link href={`/${locale}/products/${product.id}`} className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
-      <div className={`h-48 ${product.bg} flex items-center justify-center relative`}>
-        <div className="text-center p-4">
-          <p className="text-sm font-medium text-neutral-600">{product.name}</p>
-          <p className="text-xs text-neutral-500 mt-1">{t.products.productImage}</p>
-        </div>
-        {product.badge && (
-          <div className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-semibold ${
-            product.badge.tone === "hot" ? "bg-red-500 text-white" :
-            product.badge.tone === "new" ? "bg-green-500 text-white" :
-            "bg-[#FF6A00] text-white"
-          }`}>
-            {product.badge.label}
+      <div className="h-48 bg-neutral-100 flex items-center justify-center relative overflow-hidden">
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+        ) : (
+          <Package className="w-16 h-16 text-neutral-400" strokeWidth={1.5} />
+        )}
+        {(flashBadge || product.is_flash_deal) && discount > 0 && (
+          <div className="absolute top-3 left-3 px-2 py-1 rounded text-xs font-semibold bg-[#FF6A00] text-white">
+            -{discount.toFixed(0)}%
           </div>
         )}
         <button className="absolute top-3 right-3 p-2 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-white">
@@ -32,26 +45,26 @@ function ProductCard({ product }: { product: TrendingProduct }) {
           {product.name}
         </h3>
         <div className="flex items-baseline gap-2 mb-2">
-          <span className="text-lg font-bold text-[#FF6A00]">${product.priceLow}</span>
-          <span className="text-sm text-neutral-400 line-through">${product.basePrice}</span>
-          <span className="text-xs text-green-600 font-medium">
-            {Math.round((1 - product.priceLow / product.basePrice) * 100)}% off
-          </span>
+          <span className="text-lg font-bold text-[#FF6A00]">${priceLow.toFixed(2)}</span>
+          {discount > 0 && (
+            <>
+              <span className="text-sm text-neutral-400 line-through">${Number(product.base_price).toFixed(2)}</span>
+              <span className="text-xs text-green-600 font-medium">{discount.toFixed(0)}% off</span>
+            </>
+          )}
         </div>
         <div className="flex items-center justify-between text-xs text-neutral-500 mb-3">
           <span>{t.products.moq}: {product.moq} {t.products.units}</span>
-          <span>${product.priceLow} - ${product.priceHigh}</span>
+          <span className="truncate max-w-[50%]">{product.category}</span>
         </div>
         <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-medium text-neutral-700">{product.supplier}</span>
-            {product.verified && (
-              <BadgeCheck className="w-4 h-4 text-blue-500" />
-            )}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-sm font-medium text-neutral-700 truncate">{supplier}</span>
+            <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
           </div>
-          <button className="p-2 bg-orange-100 text-[#FF6A00] rounded-lg hover:bg-[#FF6A00] hover:text-white transition">
+          <span className="p-2 bg-orange-100 text-[#FF6A00] rounded-lg hover:bg-[#FF6A00] hover:text-white transition">
             <ShoppingCart className="w-4 h-4" />
-          </button>
+          </span>
         </div>
       </div>
     </Link>
@@ -92,7 +105,7 @@ function SupplierCard({ supplier }: { supplier: Supplier }) {
   );
 }
 
-export default function DesktopProducts() {
+export default function DesktopProducts({ trending, flashDeals }: { trending: DbProduct[]; flashDeals: DbProduct[] }) {
   const { t, locale } = useI18n();
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -113,11 +126,15 @@ export default function DesktopProducts() {
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-4 gap-5">
-          {trendingProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {trending.length === 0 ? (
+          <p className="p-8 text-center text-neutral-400 bg-white rounded-xl border border-neutral-200">No products yet.</p>
+        ) : (
+          <div className="grid grid-cols-4 gap-5">
+            {trending.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Flash Deals Section */}
@@ -137,11 +154,15 @@ export default function DesktopProducts() {
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-4 gap-5">
-          {trendingProducts.map((product) => (
-            <ProductCard key={`flash-${product.id}`} product={{ ...product, badge: { label: "-30%", tone: "deal" } }} />
-          ))}
-        </div>
+        {flashDeals.length === 0 ? (
+          <p className="p-8 text-center text-neutral-400 bg-white/60 rounded-xl">No flash deals right now.</p>
+        ) : (
+          <div className="grid grid-cols-4 gap-5">
+            {flashDeals.map((product) => (
+              <ProductCard key={`flash-${product.id}`} product={product} flashBadge />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Top Suppliers Section */}
