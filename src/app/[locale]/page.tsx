@@ -13,8 +13,15 @@ import DesktopHeader from "@/components/landing/DesktopHeader";
 import DesktopHero from "@/components/landing/DesktopHero";
 import DesktopProducts from "@/components/landing/DesktopProducts";
 import DesktopFooter from "@/components/landing/DesktopFooter";
+import { createClient } from "@/lib/supabase/server";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("id, name, slug, icon, thumbnail_url, is_active")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
   return (
     <>
       {/* MOBILE LAYOUT */}
@@ -32,7 +39,7 @@ export default function HomePage() {
               <FlashDealsBar />
               <FlashDealsScroll />
               <div className="h-2 bg-[#e8e5e0] mt-2.5" />
-              <CategoryGrid />
+              <CategoryGrid categories={categories ?? []} />
               <div className="h-2 bg-[#e8e5e0] mt-2.5" />
               <TrendingProducts />
               <div className="h-2 bg-[#e8e5e0] mt-2.5" />

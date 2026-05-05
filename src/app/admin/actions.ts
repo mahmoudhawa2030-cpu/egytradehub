@@ -215,6 +215,7 @@ export async function createCategory(formData: FormData) {
   }).select().single();
   if (error) return { error: error.message };
   revalidatePath("/admin/categories");
+  revalidatePath("/", "layout");
   return { success: true, category: data };
 }
 
@@ -235,6 +236,7 @@ export async function updateCategory(id: string, formData: FormData) {
   }).eq("id", id).select().single();
   if (error) return { error: error.message };
   revalidatePath("/admin/categories");
+  revalidatePath("/", "layout");
   return { success: true, category: data };
 }
 
@@ -243,6 +245,7 @@ export async function deleteCategory(id: string) {
   const { error } = await supabase.from("categories").delete().eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/admin/categories");
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -250,6 +253,7 @@ export async function toggleCategoryActive(id: string, is_active: boolean) {
   const supabase = await createClient();
   await supabase.from("categories").update({ is_active }).eq("id", id);
   revalidatePath("/admin/categories");
+  revalidatePath("/", "layout");
 }
 
 // ── RFQs ─────────────────────────────────────────────────────
