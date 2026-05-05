@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { ArrowLeft } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import ProductGallery from "@/components/product/ProductGallery";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
@@ -31,16 +31,55 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     ? Number(product.base_price) * (1 - Number(product.flash_discount_pct) / 100)
     : null;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://egytradehub.vercel.app";
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home",     item: `${siteUrl}/${locale}` },
+      { "@type": "ListItem", position: 2, name: "Products", item: `${siteUrl}/${locale}/products` },
+      { "@type": "ListItem", position: 3, name: product.category, item: `${siteUrl}/${locale}/products?category=${encodeURIComponent(product.category)}` },
+      { "@type": "ListItem", position: 4, name: product.name, item: `${siteUrl}/${locale}/products/${product.slug}` },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-[#f5f5f5]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Link
-          href={`/${locale}/products`}
-          className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-800 mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to products
-        </Link>
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-5">
+          <ol className="flex items-center flex-wrap gap-1 text-sm text-neutral-500">
+            <li>
+              <Link href={`/${locale}`} className="inline-flex items-center gap-1 hover:text-neutral-800 transition-colors">
+                <Home className="w-3.5 h-3.5" />
+                <span>Home</span>
+              </Link>
+            </li>
+            <li className="flex items-center"><ChevronRight className="w-3.5 h-3.5 text-neutral-300" /></li>
+            <li>
+              <Link href={`/${locale}/products`} className="hover:text-neutral-800 transition-colors">
+                Products
+              </Link>
+            </li>
+            <li className="flex items-center"><ChevronRight className="w-3.5 h-3.5 text-neutral-300" /></li>
+            <li>
+              <Link
+                href={`/${locale}/products?category=${encodeURIComponent(product.category)}`}
+                className="hover:text-neutral-800 transition-colors"
+              >
+                {product.category}
+              </Link>
+            </li>
+            <li className="flex items-center"><ChevronRight className="w-3.5 h-3.5 text-neutral-300" /></li>
+            <li className="text-neutral-900 font-medium truncate max-w-[260px]" aria-current="page">
+              {product.name}
+            </li>
+          </ol>
+        </nav>
 
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-[480px_1fr]">
