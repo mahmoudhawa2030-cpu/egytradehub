@@ -200,11 +200,29 @@ export async function createProduct(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  // Determine caller role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+  const isSupervisorOrAdmin = profile?.role === "admin" || profile?.role === "supervisor";
+
+  // Supervisors/admins can assign an explicit supplier_id from the form;
+  // fall back to their own id so the NOT NULL constraint is satisfied.
+  const supplierIdField = (formData.get("supplier_id") as string) || "";
+  const supplierId = isSupervisorOrAdmin
+    ? (supplierIdField || user.id)
+    : user.id;
+
   const name = formData.get("name") as string;
   const slug = await generateUniqueProductSlug(supabase, name);
 
-  const { error } = await supabase.from("products").insert({
-    supplier_id: user.id,
+  // Use admin client so supervisors bypass the "supplier_id = auth.uid()" RLS check
+  const db = isSupervisorOrAdmin ? createAdminClient() : supabase;
+
+  const { error } = await db.from("products").insert({
+    supplier_id: supplierId,
     name,
     slug,
     description: formData.get("description") as string,

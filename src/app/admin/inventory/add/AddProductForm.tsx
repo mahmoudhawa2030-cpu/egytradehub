@@ -7,7 +7,18 @@ import { ArrowLeft, Save, Zap } from "lucide-react";
 import { createProduct } from "@/app/admin/actions";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 
-export default function AddProductForm({ categories }: { categories: string[] }) {
+type Supplier = { user_id: string; full_name: string | null; company_name: string | null };
+
+export default function AddProductForm({
+  categories,
+  role = "buyer",
+  suppliers = [],
+}: {
+  categories: string[];
+  role?: string;
+  suppliers?: Supplier[];
+}) {
+  const isSupervisor = role === "admin" || role === "supervisor";
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isFlash, setIsFlash] = useState(false);
@@ -78,6 +89,24 @@ export default function AddProductForm({ categories }: { categories: string[] })
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
+
+          {isSupervisor && suppliers.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">Assign to Supplier</label>
+              <select
+                name="supplier_id"
+                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
+              >
+                <option value="">— Assign to me (supervisor) —</option>
+                {suppliers.map((s) => (
+                  <option key={s.user_id} value={s.user_id}>
+                    {s.company_name ?? s.full_name ?? s.user_id}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-neutral-400 mt-1">Leave blank to save under your own account.</p>
+            </div>
+          )}
 
           <ImageUploadField />
 
