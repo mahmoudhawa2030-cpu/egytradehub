@@ -4,7 +4,7 @@ import { useState, useTransition, useRef } from "react";
 import { X, UserPlus, Eye, EyeOff } from "lucide-react";
 import { createAdminUser } from "@/app/admin/actions";
 
-const ROLES = ["buyer", "supplier", "admin"] as const;
+const ROLES = ["buyer", "supplier", "admin", "supervisor"] as const;
 
 export default function AddUserModal() {
   const [open, setOpen] = useState(false);

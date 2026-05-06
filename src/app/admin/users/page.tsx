@@ -3,19 +3,21 @@ import { Users, ShieldCheck, ShoppingBag, ShieldBan } from "lucide-react";
 import AddUserModal from "./AddUserModal";
 import UserActions from "./UserActions";
 
-const ROLES = ["buyer", "supplier", "admin"] as const;
+const ROLES = ["buyer", "supplier", "admin", "supervisor"] as const;
 type Role = (typeof ROLES)[number];
 
 const roleBadge: Record<Role, string> = {
   buyer: "bg-blue-100 text-blue-700",
   supplier: "bg-green-100 text-green-700",
   admin: "bg-orange-100 text-[#FF6A00]",
+  supervisor: "bg-purple-100 text-purple-700",
 };
 
 const roleIcon: Record<Role, React.ElementType> = {
   buyer: ShoppingBag,
   supplier: ShieldCheck,
   admin: Users,
+  supervisor: ShieldCheck,
 };
 
 export default async function UsersPage({

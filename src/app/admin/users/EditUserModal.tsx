@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { X, Pencil } from "lucide-react";
 import { updateUserProfile } from "@/app/admin/actions";
 
-const ROLES = ["buyer", "supplier", "admin"] as const;
+const ROLES = ["buyer", "supplier", "admin", "supervisor"] as const;
 
 interface UserProfile {
   user_id: string;
