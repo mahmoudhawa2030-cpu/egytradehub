@@ -100,7 +100,7 @@ export async function suspendUser(userId: string) {
   const supabase = await createClient();
   await supabase
     .from("profiles")
-    .update({ role: "buyer", is_verified: false })
+    .update({ is_banned: true, is_verified: false })
     .eq("user_id", userId);
   revalidatePath("/admin/suppliers");
   revalidatePath("/admin/users");

@@ -52,15 +52,6 @@ export default function SignupPage() {
     if (authError) { setState("error"); setErrorMsg(authError.message); return; }
     if (!authData.user) { setState("error"); setErrorMsg("Failed to create account."); return; }
 
-    await supabase.from("profiles").insert({
-      user_id: authData.user.id,
-      role: form.role,
-      full_name: form.fullName,
-      company_name: form.companyName,
-      country: form.country,
-      is_verified: false,
-    });
-
     setState("success");
     setTimeout(() => {
       if (form.role === "admin") router.push(`/${locale}/admin/dashboard`);
