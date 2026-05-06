@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Zap } from "lucide-react";
 import { createProduct } from "@/app/admin/actions";
-import ImageUploadField from "@/components/admin/ImageUploadField";
+import GalleryUploadField from "@/components/admin/GalleryUploadField";
 
 export default function SupplierAddProductForm({ categories }: { categories: string[] }) {
   const router = useRouter();
@@ -79,7 +79,7 @@ export default function SupplierAddProductForm({ categories }: { categories: str
             </select>
           </div>
 
-          <ImageUploadField />
+          <GalleryUploadField />
 
           <div className="grid grid-cols-2 gap-4">
             <div>

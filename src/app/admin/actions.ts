@@ -230,6 +230,7 @@ export async function createProduct(formData: FormData) {
     base_price: parseFloat(formData.get("base_price") as string),
     moq: parseInt(formData.get("moq") as string, 10),
     image_url: (formData.get("image_url") as string) || null,
+    gallery_images: (() => { try { return JSON.parse((formData.get("gallery_images") as string) || "[]"); } catch { return []; } })(),
     is_flash_deal: formData.get("is_flash_deal") === "true",
     flash_discount_pct: formData.get("flash_discount_pct")
       ? parseFloat(formData.get("flash_discount_pct") as string)
@@ -272,6 +273,7 @@ export async function updateProduct(productId: string, formData: FormData) {
       base_price: parseFloat(formData.get("base_price") as string),
       moq: parseInt(formData.get("moq") as string, 10),
       image_url: (formData.get("image_url") as string) || null,
+      gallery_images: (() => { try { return JSON.parse((formData.get("gallery_images") as string) || "[]"); } catch { return []; } })(),
       is_flash_deal: formData.get("is_flash_deal") === "true",
       flash_discount_pct: formData.get("flash_discount_pct")
         ? parseFloat(formData.get("flash_discount_pct") as string)

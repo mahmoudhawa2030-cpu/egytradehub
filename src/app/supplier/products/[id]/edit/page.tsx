@@ -15,7 +15,7 @@ export default async function SupplierEditProductPage({
   const [productRes, categoriesRes] = await Promise.all([
     supabase
       .from("products")
-      .select("id, name, description, category, base_price, moq, image_url, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id")
+      .select("id, name, description, category, base_price, moq, image_url, gallery_images, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id")
       .eq("id", id)
       .maybeSingle(),
     supabase.from("categories").select("name").eq("is_active", true).order("sort_order", { ascending: true }),

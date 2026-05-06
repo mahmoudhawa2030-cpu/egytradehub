@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Zap } from "lucide-react";
 import { updateProduct } from "@/app/admin/actions";
-import ImageUploadField from "@/components/admin/ImageUploadField";
+import GalleryUploadField from "@/components/admin/GalleryUploadField";
 
 interface Product {
   id: string;
@@ -15,6 +15,7 @@ interface Product {
   base_price: number;
   moq: number;
   image_url: string | null;
+  gallery_images: string[];
   is_flash_deal: boolean;
   flash_discount_pct: number | null;
   flash_starts_at: string | null;
@@ -93,7 +94,7 @@ export default function SupplierEditProductForm({ product, categories }: { produ
             </select>
           </div>
 
-          <ImageUploadField defaultUrl={product.image_url} />
+          <GalleryUploadField defaultImages={product.gallery_images?.length ? product.gallery_images : (product.image_url ? [product.image_url] : [])} />
 
           <div className="grid grid-cols-2 gap-4">
             <div>

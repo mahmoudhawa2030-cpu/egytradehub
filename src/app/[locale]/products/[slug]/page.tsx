@@ -11,7 +11,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const { data: product, error } = await supabase
     .from("products")
-    .select("id, slug, name, description, category, base_price, moq, image_url, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id, profiles!supplier_id(full_name, company_name)")
+    .select("id, slug, name, description, category, base_price, moq, image_url, gallery_images, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id, profiles!supplier_id(full_name, company_name)")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -27,7 +27,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const supplierName = supplier?.company_name ?? supplier?.full_name ?? "—";
   const supplierId: string = (product as any).supplier_id;
 
-  const images: string[] = product.image_url ? [product.image_url] : [];
+  const gallery = (product as any).gallery_images as string[] | null;
+  const images: string[] = gallery?.length ? gallery : (product.image_url ? [product.image_url] : []);
 
   const discountedPrice = product.is_flash_deal && product.flash_discount_pct
     ? Number(product.base_price) * (1 - Number(product.flash_discount_pct) / 100)
