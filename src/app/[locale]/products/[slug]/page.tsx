@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ChevronRight, Home } from "lucide-react";
 import ProductGallery from "@/components/product/ProductGallery";
+import ProductActions from "@/components/product/ProductActions";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
@@ -10,7 +11,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const { data: product, error } = await supabase
     .from("products")
-    .select("id, slug, name, description, category, base_price, moq, image_url, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, profiles!supplier_id(full_name, company_name)")
+    .select("id, slug, name, description, category, base_price, moq, image_url, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id, profiles!supplier_id(full_name, company_name)")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -24,6 +25,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const supplier = (product as any).profiles as { full_name?: string; company_name?: string } | null;
   const supplierName = supplier?.company_name ?? supplier?.full_name ?? "—";
+  const supplierId: string = (product as any).supplier_id;
 
   const images: string[] = product.image_url ? [product.image_url] : [];
 
@@ -147,14 +149,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </div>
 
               {/* CTA buttons */}
-              <div className="flex gap-3 mt-2">
-                <button className="flex-1 bg-[#FF6A00] hover:bg-[#e05e00] text-white text-sm font-semibold py-3 rounded-lg transition-colors">
-                  Send Inquiry
-                </button>
-                <button className="flex-1 border border-[#FF6A00] text-[#FF6A00] hover:bg-orange-50 text-sm font-semibold py-3 rounded-lg transition-colors">
-                  Chat with Supplier
-                </button>
-              </div>
+              <ProductActions
+                productId={product.id}
+                productName={product.name}
+                supplierId={supplierId}
+                locale={locale}
+              />
             </div>
           </div>
         </div>
