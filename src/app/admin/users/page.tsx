@@ -34,34 +34,89 @@ export default async function UsersPage({
   const authResult = await supabase.auth.getUser();
   const currentUser = authResult.data?.user ?? null;
 
-  let query = adminDb
-    .from("profiles")
-    .select("user_id, full_name, company_name, country, role, is_verified, is_banned, created_at")
-    .order("created_at", { ascending: false });
+  // Fetch ALL auth users (source of truth) + all profiles in parallel
+  const [authUsersRes, profilesRes] = await Promise.all([
+    adminDb.auth.admin.listUsers({ perPage: 1000 }),
+    adminDb.from("profiles").select("user_id, full_name, company_name, country, role, is_verified, is_banned, created_at"),
+  ]);
 
-  if (filterRole && ROLES.includes(filterRole as Role)) {
-    query = query.eq("role", filterRole);
-  }
-
-  const { data: users, error: usersError } = await query;
-  const list = users ?? [];
-
-  if (usersError) {
+  if (authUsersRes.error) {
     return (
       <div className="p-8">
         <div className="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700">
-          <p className="font-semibold mb-1">Database error</p>
-          <p className="text-sm font-mono">{usersError.message}</p>
+          <p className="font-semibold mb-1">Auth error</p>
+          <p className="text-sm font-mono">{authUsersRes.error.message}</p>
         </div>
       </div>
     );
   }
 
+  const profileMap = new Map((profilesRes.data ?? []).map((p) => [p.user_id, p]));
+
+  // Backfill profiles for auth users that are missing one
+  const missing = authUsersRes.data.users.filter((u) => !profileMap.has(u.id));
+  if (missing.length > 0) {
+    const rows = missing.map((u) => {
+      const meta = u.user_metadata ?? {};
+      const _role = ROLES.includes(meta.role) ? meta.role : "buyer";
+      return {
+        user_id: u.id,
+        full_name: meta.full_name ?? null,
+        company_name: meta.company_name ?? null,
+        country: meta.country ?? null,
+        role: _role,
+        is_verified: false,
+        is_banned: false,
+        created_at: u.created_at,
+      };
+    });
+    const { data: inserted } = await adminDb.from("profiles").upsert(rows, { onConflict: "user_id", ignoreDuplicates: true }).select("user_id, full_name, company_name, country, role, is_verified, is_banned, created_at");
+    (inserted ?? []).forEach((p) => profileMap.set(p.user_id, p));
+  }
+
+  // Build merged list: every auth user, with profile data merged in
+  type MergedUser = {
+    user_id: string;
+    email: string;
+    full_name: string | null;
+    company_name: string | null;
+    country: string | null;
+    role: string;
+    is_verified: boolean;
+    is_banned: boolean;
+    created_at: string;
+  };
+
+  let allUsers: MergedUser[] = authUsersRes.data.users.map((u) => {
+    const p = profileMap.get(u.id);
+    return {
+      user_id: u.id,
+      email: u.email ?? "",
+      full_name: p?.full_name ?? (u.user_metadata?.full_name as string | null) ?? null,
+      company_name: p?.company_name ?? (u.user_metadata?.company_name as string | null) ?? null,
+      country: p?.country ?? (u.user_metadata?.country as string | null) ?? null,
+      role: p?.role ?? "buyer",
+      is_verified: p?.is_verified ?? false,
+      is_banned: p?.is_banned ?? false,
+      created_at: p?.created_at ?? u.created_at,
+    };
+  });
+
+  // Sort newest first
+  allUsers.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  // Apply role filter
+  if (filterRole && ROLES.includes(filterRole as Role)) {
+    allUsers = allUsers.filter((u) => u.role === filterRole);
+  }
+
+  const list = allUsers;
+
   const counts = {
-    buyer: list.filter((u) => u.role === "buyer").length,
-    supplier: list.filter((u) => u.role === "supplier").length,
-    admin: list.filter((u) => u.role === "admin").length,
-    banned: list.filter((u) => u.is_banned === true).length,
+    buyer: allUsers.filter((u) => u.role === "buyer").length,
+    supplier: allUsers.filter((u) => u.role === "supplier").length,
+    admin: allUsers.filter((u) => u.role === "admin").length,
+    banned: allUsers.filter((u) => u.is_banned === true).length,
   };
 
   return (
@@ -127,7 +182,7 @@ export default async function UsersPage({
             </thead>
             <tbody className="divide-y divide-neutral-100">
               {list.map((user) => {
-                const name = user.company_name ?? user.full_name ?? "Unknown";
+                const name = user.company_name ?? user.full_name ?? user.email ?? "Unknown";
                 const role = user.role as Role;
                 const RoleIcon = roleIcon[role];
                 const isSelf = user.user_id === currentUser?.id;
