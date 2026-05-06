@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Users, ShieldCheck, ShoppingBag, ShieldBan } from "lucide-react";
 import AddUserModal from "./AddUserModal";
 import UserActions from "./UserActions";
@@ -28,13 +29,14 @@ export default async function UsersPage({
   try {
   const { role: filterRole } = await searchParams;
   const supabase = await createClient();
+  const adminDb = createAdminClient();
 
   const authResult = await supabase.auth.getUser();
   const currentUser = authResult.data?.user ?? null;
 
-  let query = supabase
+  let query = adminDb
     .from("profiles")
-    .select("user_id, full_name, company_name, country, role, is_verified, created_at")
+    .select("user_id, full_name, company_name, country, role, is_verified, is_banned, created_at")
     .order("created_at", { ascending: false });
 
   if (filterRole && ROLES.includes(filterRole as Role)) {
@@ -59,7 +61,7 @@ export default async function UsersPage({
     buyer: list.filter((u) => u.role === "buyer").length,
     supplier: list.filter((u) => u.role === "supplier").length,
     admin: list.filter((u) => u.role === "admin").length,
-    banned: list.filter((u) => (u as { is_banned?: boolean }).is_banned === true).length,
+    banned: list.filter((u) => u.is_banned === true).length,
   };
 
   return (
@@ -129,7 +131,7 @@ export default async function UsersPage({
                 const role = user.role as Role;
                 const RoleIcon = roleIcon[role];
                 const isSelf = user.user_id === currentUser?.id;
-                const isBanned = (user as { is_banned?: boolean }).is_banned === true;
+                const isBanned = user.is_banned === true;
                 return (
                   <tr key={user.user_id} className={`hover:bg-neutral-50 transition ${isBanned ? "opacity-60" : ""}`}>
                     <td className="px-6 py-4">
