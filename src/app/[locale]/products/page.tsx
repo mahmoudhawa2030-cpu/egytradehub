@@ -111,7 +111,7 @@ export default async function ProductsPage({
                 href={`/${locale}/products?category=${encodeURIComponent(parentCategory!.name)}`}
                 className={`flex flex-col items-center gap-2 flex-shrink-0 group`}
               >
-                <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center overflow-hidden bg-neutral-50 transition-colors ${!activeSubName ? "border-[#FF6A00]" : "border-neutral-200 group-hover:border-neutral-400"}`}>
+                <div className={`w-24 h-24 rounded-full border-2 flex items-center justify-center overflow-hidden bg-neutral-50 transition-colors ${!activeSubName ? "border-[#FF6A00]" : "border-neutral-200 group-hover:border-neutral-400"}`}>
                   <span className="text-xs font-semibold text-neutral-500">All</span>
                 </div>
                 <span className={`text-xs text-center leading-tight max-w-[72px] ${!activeSubName ? "text-[#FF6A00] font-semibold" : "text-neutral-600"}`}>
@@ -125,7 +125,7 @@ export default async function ProductsPage({
                   href={`/${locale}/products?category=${encodeURIComponent(parentCategory!.name)}&sub=${encodeURIComponent(sub.name)}`}
                   className="flex flex-col items-center gap-2 flex-shrink-0 group"
                 >
-                  <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center overflow-hidden bg-neutral-50 transition-colors ${activeSubName === sub.name ? "border-[#FF6A00]" : "border-neutral-200 group-hover:border-neutral-400"}`}>
+                  <div className={`w-24 h-24 rounded-full border-2 flex items-center justify-center overflow-hidden bg-neutral-50 transition-colors ${activeSubName === sub.name ? "border-[#FF6A00]" : "border-neutral-200 group-hover:border-neutral-400"}`}>
                     {sub.thumbnail_url ? (
                       <img src={sub.thumbnail_url} alt={sub.name} className="w-full h-full object-cover" />
                     ) : (
