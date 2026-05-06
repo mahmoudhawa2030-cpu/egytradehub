@@ -54,8 +54,8 @@ export default function SignupPage() {
 
     setState("success");
     setTimeout(() => {
-      if (form.role === "admin") router.push(`/${locale}/admin/dashboard`);
-      else if (form.role === "supplier") router.push(`/${locale}/supplier/dashboard`);
+      if (form.role === "admin") router.push(`/admin/dashboard`);
+      else if (form.role === "supplier") router.push(`/supplier/dashboard`);
       else router.push(`/${locale}`);
       router.refresh();
     }, 1500);

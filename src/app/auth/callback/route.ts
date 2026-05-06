@@ -19,10 +19,10 @@ export async function GET(request: Request) {
         .single();
 
       let redirectTo = "/en";
-      if (profile?.role === "admin") {
-        redirectTo = "/en/admin/dashboard";
+      if (profile?.role === "admin" || profile?.role === "supervisor") {
+        redirectTo = "/admin/dashboard";
       } else if (profile?.role === "supplier") {
-        redirectTo = "/en/supplier/dashboard";
+        redirectTo = "/supplier/dashboard";
       }
 
       return NextResponse.redirect(`${origin}${redirectTo}`);
