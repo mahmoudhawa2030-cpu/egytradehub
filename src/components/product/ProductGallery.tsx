@@ -19,15 +19,15 @@ export default function ProductGallery({ images, productName, isFlashDeal }: Pro
   const activeImage = allImages[activeIndex] ?? null;
 
   return (
-    <div className="flex gap-3 h-full">
-      {/* Thumbnail strip – left column */}
+    <div className="flex gap-3 items-start">
+      {/* Thumbnail strip – left column, top-aligned */}
       {allImages.length > 1 && (
-        <div className="flex flex-col gap-2 w-[72px] shrink-0">
+        <div className="flex flex-col gap-2 w-[80px] shrink-0">
           {allImages.map((src, idx) => (
             <button
               key={idx}
               onClick={() => setActiveIndex(idx)}
-              className={`w-[72px] h-[72px] rounded-lg border-2 overflow-hidden shrink-0 transition-colors ${
+              className={`w-[80px] h-[80px] rounded-lg border-2 overflow-hidden shrink-0 transition-colors ${
                 idx === activeIndex
                   ? "border-[#FF6A00]"
                   : "border-neutral-200 hover:border-neutral-400"
@@ -44,7 +44,7 @@ export default function ProductGallery({ images, productName, isFlashDeal }: Pro
       )}
 
       {/* Main image */}
-      <div className="relative flex-1 bg-neutral-50 rounded-xl overflow-hidden flex items-center justify-center min-h-[360px]">
+      <div className="relative flex-1 bg-neutral-50 rounded-xl overflow-hidden flex items-center justify-center h-[460px]">
         {activeImage ? (
           <img
             src={activeImage}
