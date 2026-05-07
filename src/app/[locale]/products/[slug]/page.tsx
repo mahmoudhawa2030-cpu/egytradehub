@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ChevronRight, Home } from "lucide-react";
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductActions from "@/components/product/ProductActions";
+import RelatedProducts from "@/components/product/RelatedProducts";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
@@ -29,6 +30,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const gallery = (product as any).gallery_images as string[] | null;
   const images: string[] = gallery?.length ? gallery : (product.image_url ? [product.image_url] : []);
+
+  const { data: relatedData } = await supabase
+    .from("products")
+    .select("id, slug, name, category, base_price, image_url, gallery_images, is_flash_deal, flash_discount_pct")
+    .eq("category", product.category)
+    .neq("id", product.id)
+    .limit(8);
+  const related = relatedData ?? [];
 
   const discountedPrice = product.is_flash_deal && product.flash_discount_pct
     ? Number(product.base_price) * (1 - Number(product.flash_discount_pct) / 100)
@@ -159,6 +168,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             </div>
           </div>
         </div>
+
+        {/* ── Related Products ── */}
+        {related.length > 0 && (
+          <RelatedProducts products={related} locale={locale} />
+        )}
       </div>
     </main>
   );
