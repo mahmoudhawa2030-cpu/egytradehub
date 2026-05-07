@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { Zap, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ProductGalleryProps {
   images: string[];
@@ -9,47 +9,119 @@ interface ProductGalleryProps {
   isFlashDeal: boolean;
 }
 
+const THUMB_VISIBLE = 6;
+const THUMB_SIZE = 82;   // px — width & height of each thumbnail
+const THUMB_GAP = 8;     // px gap between thumbs
+
 export default function ProductGallery({ images, productName, isFlashDeal }: ProductGalleryProps) {
   const allImages = images.length > 0 ? images : [];
   const [activeIndex, setActiveIndex] = useState(0);
+  const [thumbOffset, setThumbOffset] = useState(0); // index of first visible thumb
 
-  const prev = () => setActiveIndex((i) => (i - 1 + allImages.length) % allImages.length);
-  const next = () => setActiveIndex((i) => (i + 1) % allImages.length);
+  const totalThumbs = allImages.length;
+  const canScrollUp = thumbOffset > 0;
+  const canScrollDown = thumbOffset + THUMB_VISIBLE < totalThumbs;
+
+  const visibleThumbs = allImages.slice(thumbOffset, thumbOffset + THUMB_VISIBLE);
+
+  function scrollUp() {
+    setThumbOffset((o) => Math.max(0, o - 1));
+  }
+  function scrollDown() {
+    setThumbOffset((o) => Math.min(totalThumbs - THUMB_VISIBLE, o + 1));
+  }
+
+  function prevMain() {
+    const newIdx = (activeIndex - 1 + totalThumbs) % totalThumbs;
+    setActiveIndex(newIdx);
+    // Keep active thumb visible
+    if (newIdx < thumbOffset) setThumbOffset(newIdx);
+    if (newIdx >= thumbOffset + THUMB_VISIBLE) setThumbOffset(newIdx - THUMB_VISIBLE + 1);
+  }
+  function nextMain() {
+    const newIdx = (activeIndex + 1) % totalThumbs;
+    setActiveIndex(newIdx);
+    if (newIdx < thumbOffset) setThumbOffset(newIdx);
+    if (newIdx >= thumbOffset + THUMB_VISIBLE) setThumbOffset(newIdx - THUMB_VISIBLE + 1);
+  }
 
   const activeImage = allImages[activeIndex] ?? null;
 
+  // Total height of thumb strip = 6 thumbs + 5 gaps
+  const stripHeight = THUMB_VISIBLE * THUMB_SIZE + (THUMB_VISIBLE - 1) * THUMB_GAP;
+
   return (
     <div className="flex gap-3 items-start">
-      {/* Thumbnail strip – left column, top-aligned */}
+
+      {/* ── Thumbnail strip ── */}
       {allImages.length > 1 && (
-        <div className="flex flex-col gap-2 w-[80px] shrink-0">
-          {allImages.map((src, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveIndex(idx)}
-              className={`w-[80px] h-[80px] rounded-lg border-2 overflow-hidden shrink-0 transition-colors ${
-                idx === activeIndex
-                  ? "border-[#FF6A00]"
-                  : "border-neutral-200 hover:border-neutral-400"
-              }`}
-            >
-              <img
-                src={src}
-                alt={`${productName} thumbnail ${idx + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </button>
-          ))}
+        <div className="flex flex-col items-center shrink-0" style={{ width: THUMB_SIZE }}>
+          {/* Up arrow */}
+          <button
+            onClick={scrollUp}
+            disabled={!canScrollUp}
+            className={`w-full flex items-center justify-center py-1 mb-1 rounded transition-colors ${
+              canScrollUp
+                ? "text-neutral-500 hover:text-[#FF6A00] hover:bg-orange-50"
+                : "text-neutral-200 cursor-default"
+            }`}
+          >
+            <ChevronUp className="w-5 h-5" />
+          </button>
+
+          {/* Visible thumbnails */}
+          <div
+            className="flex flex-col overflow-hidden"
+            style={{ gap: THUMB_GAP, height: stripHeight }}
+          >
+            {visibleThumbs.map((src, i) => {
+              const realIdx = i + thumbOffset;
+              return (
+                <button
+                  key={realIdx}
+                  onClick={() => setActiveIndex(realIdx)}
+                  style={{ width: THUMB_SIZE, height: THUMB_SIZE }}
+                  className={`rounded-lg border-2 overflow-hidden shrink-0 transition-colors ${
+                    realIdx === activeIndex
+                      ? "border-[#FF6A00]"
+                      : "border-neutral-200 hover:border-neutral-400"
+                  }`}
+                >
+                  <img
+                    src={src}
+                    alt={`${productName} ${realIdx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Down arrow */}
+          <button
+            onClick={scrollDown}
+            disabled={!canScrollDown}
+            className={`w-full flex items-center justify-center py-1 mt-1 rounded transition-colors ${
+              canScrollDown
+                ? "text-neutral-500 hover:text-[#FF6A00] hover:bg-orange-50"
+                : "text-neutral-200 cursor-default"
+            }`}
+          >
+            <ChevronDown className="w-5 h-5" />
+          </button>
         </div>
       )}
 
-      {/* Main image */}
-      <div className="relative flex-1 bg-neutral-50 rounded-xl overflow-hidden flex items-center justify-center h-[460px]">
+      {/* ── Main image ── */}
+      <div
+        className="relative flex-1 bg-neutral-50 rounded-xl overflow-hidden flex items-center justify-center"
+        style={{ height: stripHeight + 40 /* account for arrow buttons */ }}
+      >
         {activeImage ? (
           <img
             src={activeImage}
             alt={productName}
-            className="w-full h-full object-contain max-h-[460px]"
+            className="w-full h-full object-contain"
           />
         ) : (
           <div className="flex flex-col items-center gap-2 text-neutral-300">
@@ -67,16 +139,17 @@ export default function ProductGallery({ images, productName, isFlashDeal }: Pro
           </div>
         )}
 
+        {/* Left / right arrows on main image */}
         {allImages.length > 1 && (
           <>
             <button
-              onClick={prev}
+              onClick={prevMain}
               className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow flex items-center justify-center transition-colors"
             >
               <ChevronLeft className="w-4 h-4 text-neutral-700" />
             </button>
             <button
-              onClick={next}
+              onClick={nextMain}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow flex items-center justify-center transition-colors"
             >
               <ChevronRight className="w-4 h-4 text-neutral-700" />
