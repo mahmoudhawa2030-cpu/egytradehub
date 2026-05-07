@@ -94,7 +94,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </nav>
 
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-[480px_1fr]">
+          <div className="grid grid-cols-1 lg:grid-cols-[610px_1fr]">
             {/* ── LEFT: Gallery ── */}
             <div className="border-b lg:border-b-0 lg:border-r border-neutral-100 p-6">
               <ProductGallery
