@@ -1,29 +1,130 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, MessageSquare, User, ChevronDown, Menu, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, ShoppingCart, MessageSquare, User, ChevronDown, Menu, Heart, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/i18n/context";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 type DbCategory = { id: string; name: string; slug: string; parent_id: string | null };
 
-export default function DesktopHeader({ categories = [] }: { categories?: DbCategory[] }) {
+// Demo placeholder terms per category (used for rotating placeholder)
+const CATEGORY_TERMS: Record<string, string[]> = {
+  default: ["hydraulic pumps", "ceramic tiles", "cotton fabric", "LED strip lights", "solar panels", "steel pipes", "marble slabs", "olive oil bulk"],
+  Electronics: ["LED strip lights", "solar panels", "circuit breakers", "CCTV cameras", "UPS systems"],
+  "Building Materials": ["ceramic tiles", "marble slabs", "steel rebar", "gypsum boards", "PVC pipes"],
+  Textiles: ["cotton fabric rolls", "polyester yarn", "denim fabric", "ready-made garments", "linen sheets"],
+  "Food & Agriculture": ["olive oil bulk", "dates wholesale", "spices bulk", "rice 50kg bags", "sugar raw"],
+  Chemicals: ["industrial solvents", "epoxy resin", "cleaning chemicals", "paint thinner", "adhesives"],
+  Machinery: ["hydraulic pumps", "conveyor belts", "CNC machines", "compressors", "generators"],
+  Furniture: ["office chairs bulk", "metal shelving", "wooden pallets", "sofa sets wholesale", "tables"],
+};
+
+export default function DesktopHeader({
+  categories = [],
+  activeCategory,
+}: {
+  categories?: DbCategory[];
+  activeCategory?: string;
+}) {
   const topLevel = categories.filter((c) => c.parent_id === null);
   const { t, locale } = useI18n();
+  const router = useRouter();
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [showCategories, setShowCategories] = useState(false);
+  const [placeholder, setPlaceholder] = useState("");
+  const searchRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
 
+  // ── Auth ──
   useEffect(() => {
-    async function checkAuth() {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user ? { email: data.user.email } : null);
+    supabase.auth.getUser().then(({ data }) =>
+      setUser(data.user ? { email: data.user.email } : null)
+    );
+  }, []);
+
+  // ── Rotating placeholder ──
+  useEffect(() => {
+    const terms = (activeCategory && CATEGORY_TERMS[activeCategory])
+      ? CATEGORY_TERMS[activeCategory]
+      : CATEGORY_TERMS.default;
+    let idx = Math.floor(Math.random() * terms.length);
+    setPlaceholder(`Search: ${terms[idx]}…`);
+    const interval = setInterval(() => {
+      idx = (idx + 1) % terms.length;
+      setPlaceholder(`Search: ${terms[idx]}…`);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [activeCategory]);
+
+  // ── Autocomplete fetch (datamuse via our proxy) ──
+  const fetchSuggestions = useCallback(async (q: string) => {
+    if (!q.trim()) { setSuggestions([]); return; }
+    try {
+      const res = await fetch(`/api/autocomplete?q=${encodeURIComponent(q)}`);
+      const data: string[] = await res.json();
+      setSuggestions(data);
+      setShowSuggestions(data.length > 0);
+    } catch {
+      setSuggestions([]);
     }
-    checkAuth();
-  }, [supabase]);
+  }, []);
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value;
+    setSearchQuery(val);
+    setActiveSuggestion(-1);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchSuggestions(val), 220);
+  }
+
+  function doSearch(q: string) {
+    if (!q.trim()) return;
+    setShowSuggestions(false);
+    router.push(`/${locale}/search?q=${encodeURIComponent(q.trim())}`);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (!showSuggestions) {
+      if (e.key === "Enter") doSearch(searchQuery);
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveSuggestion((i) => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveSuggestion((i) => Math.max(i - 1, -1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeSuggestion >= 0) {
+        doSearch(suggestions[activeSuggestion]);
+        setSearchQuery(suggestions[activeSuggestion]);
+      } else {
+        doSearch(searchQuery);
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+    }
+  }
+
+  // ── Close dropdown on outside click ──
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const topNavLinks = [
     { label: t.common.products, href: `/${locale}/products` },
@@ -34,7 +135,7 @@ export default function DesktopHeader({ categories = [] }: { categories?: DbCate
   ];
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-white shadow-sm sticky top-0 z-40">
       {/* Top bar */}
       <div className="bg-neutral-100 border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -45,11 +146,7 @@ export default function DesktopHeader({ categories = [] }: { categories?: DbCate
             </div>
             <div className="flex items-center gap-6">
               {topNavLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="text-neutral-600 hover:text-[#FF6A00] transition"
-                >
+                <Link key={link.label} href={link.href} className="text-neutral-600 hover:text-[#FF6A00] transition">
                   {link.label}
                 </Link>
               ))}
@@ -62,7 +159,7 @@ export default function DesktopHeader({ categories = [] }: { categories?: DbCate
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center gap-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+          <Link href={`/${locale}`} className="flex items-center gap-2 flex-shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF6A00] to-[#FF8C00] flex items-center justify-center">
               <span className="text-white font-display text-xl font-bold">T</span>
             </div>
@@ -72,28 +169,69 @@ export default function DesktopHeader({ categories = [] }: { categories?: DbCate
           </Link>
 
           {/* Search bar */}
-          <div className="flex-1 max-w-2xl">
-            <div className="flex">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t.common.searchPlaceholderDesktop}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-[#FF6A00] rounded-l-lg focus:outline-none text-sm"
-                />
+          <div className="flex-1 max-w-2xl" ref={searchRef}>
+            <div className="relative">
+              <div className="flex">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                    placeholder={placeholder}
+                    className="w-full pl-10 pr-8 py-3 border-2 border-[#FF6A00] rounded-l-lg focus:outline-none text-sm"
+                    autoComplete="off"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => { setSearchQuery(""); setSuggestions([]); setShowSuggestions(false); }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => doSearch(searchQuery)}
+                  className="px-8 py-3 bg-[#FF6A00] text-white font-semibold rounded-r-lg hover:bg-[#FF8C00] transition"
+                >
+                  {t.common.search}
+                </button>
               </div>
-              <button className="px-8 py-3 bg-[#FF6A00] text-white font-semibold rounded-r-lg hover:bg-[#FF8C00] transition">
-                {t.common.search}
-              </button>
+
+              {/* Autocomplete dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-[88px] bg-white border border-neutral-200 rounded-b-xl shadow-xl z-50 overflow-hidden">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={s}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => { setSearchQuery(s); doSearch(s); }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors ${
+                        i === activeSuggestion ? "bg-orange-50 text-[#FF6A00]" : "hover:bg-neutral-50 text-neutral-700"
+                      }`}
+                    >
+                      <Search className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* Trending tags */}
             <div className="flex items-center gap-4 mt-2 text-xs text-neutral-500">
               <span>Trending:</span>
-              {["LED Lights", "Solar Panels", "Bluetooth Earphones", "Smart Watches"].map((tag) => (
-                <Link key={tag} href={`/search?q=${tag}`} className="hover:text-[#FF6A00] transition">
+              {["LED Lights", "Solar Panels", "Ceramic Tiles", "Cotton Fabric"].map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => doSearch(tag)}
+                  className="hover:text-[#FF6A00] transition"
+                >
                   {tag}
-                </Link>
+                </button>
               ))}
             </div>
           </div>
@@ -108,10 +246,10 @@ export default function DesktopHeader({ categories = [] }: { categories?: DbCate
               <Heart className="w-6 h-6" />
               <span className="text-xs">{t.common.wishlist}</span>
             </button>
-            <button className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
+            <Link href={`/${locale}/messages`} className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
               <MessageSquare className="w-6 h-6" />
               <span className="text-xs">{t.common.messages}</span>
-            </button>
+            </Link>
             {user ? (
               <Link href={`/${locale}/account`} className="flex flex-col items-center gap-1 text-neutral-600 hover:text-[#FF6A00] transition">
                 <div className="w-6 h-6 rounded-full bg-[#FF6A00] text-white flex items-center justify-center text-xs font-bold">
@@ -164,13 +302,17 @@ export default function DesktopHeader({ categories = [] }: { categories?: DbCate
 
       {/* Mega menu dropdown */}
       {showCategories && (
-        <div className="absolute left-0 right-0 bg-white shadow-xl border-t border-neutral-200 z-50">
+        <div
+          className="absolute left-0 right-0 bg-white shadow-xl border-t border-neutral-200 z-50"
+          onMouseLeave={() => setShowCategories(false)}
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-4 gap-8">
               {topLevel.map((cat) => (
                 <Link
                   key={cat.id}
                   href={`/${locale}/products?category=${encodeURIComponent(cat.name)}`}
+                  onClick={() => setShowCategories(false)}
                   className="group"
                 >
                   <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition">

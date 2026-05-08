@@ -56,8 +56,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: request.headers } });
   }
 
+  // Inject x-pathname so layouts can detect current route
+  const reqHeaders = new Headers(request.headers);
+  reqHeaders.set("x-pathname", pathname);
+
   let response = NextResponse.next({
-    request: { headers: request.headers },
+    request: { headers: reqHeaders },
   });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -94,8 +98,8 @@ export async function middleware(request: NextRequest) {
 
   const locale = (LOCALES.find((l) => pathname.startsWith(`/${l}`)) ?? "en") as Locale;
 
-  const publicRoutes = ["/", "/login", "/signup", "/forgot-password"];
-  if (publicRoutes.some((r) => pathnameWithoutLocale === r || pathnameWithoutLocale.startsWith(r + "?"))) {
+  const publicRoutes = ["/", "/login", "/signup", "/forgot-password", "/products", "/search", "/rfq", "/help", "/suppliers", "/deals"];
+  if (publicRoutes.some((r) => pathnameWithoutLocale === r || pathnameWithoutLocale.startsWith(r + "?") || pathnameWithoutLocale.startsWith(r + "/"))) {
     return response;
   }
 
