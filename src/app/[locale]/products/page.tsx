@@ -2,6 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Zap, BadgeCheck, ChevronRight, Home } from "lucide-react";
 
+export const revalidate = 30;
+
 export default async function ProductsPage({
   params,
   searchParams,

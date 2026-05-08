@@ -6,6 +6,8 @@ import ProductGallery from "@/components/product/ProductGallery";
 import ProductActions from "@/components/product/ProductActions";
 import RelatedProducts from "@/components/product/RelatedProducts";
 
+export const revalidate = 60;
+
 export default async function ProductDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
   const supabase = await createClient();

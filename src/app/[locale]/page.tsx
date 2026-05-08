@@ -1,3 +1,5 @@
+export const revalidate = 60;
+
 import MobileTopBar from "@/components/landing/MobileTopBar";
 import HeroBanner from "@/components/landing/HeroBanner";
 import FlashDealsBar from "@/components/landing/FlashDealsBar";
