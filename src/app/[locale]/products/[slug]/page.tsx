@@ -12,7 +12,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const { data: product, error } = await supabase
     .from("products")
-    .select("id, slug, name, description, category, base_price, moq, image_url, gallery_images, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id, profiles!supplier_id(full_name, company_name)")
+    .select("id, slug, name, description, category, base_price, moq, sample_price, image_url, gallery_images, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id, profiles!supplier_id(full_name, company_name)")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -104,10 +104,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               />
             </div>
 
-            {/* ── RIGHT: Info ── */}
-            <div className="p-6 md:p-8 flex flex-col gap-5">
+            {/* ── RIGHT: Info panel ── */}
+            <div className="p-6 md:p-8 flex flex-col justify-between" style={{ minHeight: 572 }}>
+              {/* Top: name + category */}
               <div>
-                <p className="text-xs uppercase tracking-widest text-[#FF6A00] font-semibold mb-2">
+                <p className="text-xs uppercase tracking-widest text-[#FF6A00] font-semibold mb-1">
                   {product.category}
                 </p>
                 <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 leading-snug">
@@ -115,56 +116,80 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </h1>
               </div>
 
-              {/* Price */}
-              <div className="flex items-end gap-3 py-3 border-y border-neutral-100">
-                {discountedPrice ? (
-                  <>
-                    <span className="text-3xl font-bold text-[#FF6A00]">
-                      ${discountedPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                    <span className="text-lg text-neutral-400 line-through">
-                      ${Number(product.base_price).toLocaleString()}
-                    </span>
-                    <span className="ml-1 text-xs font-semibold bg-orange-100 text-[#FF6A00] px-2 py-0.5 rounded-full">
-                      -{Number(product.flash_discount_pct).toFixed(0)}% OFF
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-3xl font-bold text-[#FF6A00]">
-                    ${Number(product.base_price).toLocaleString()}
+              {/* Price rows table */}
+              <div className="mt-5 rounded-xl border border-neutral-100 overflow-hidden text-sm">
+                {/* Unit price */}
+                <div className="flex items-center border-b border-neutral-100">
+                  <span className="w-36 shrink-0 px-4 py-3 bg-neutral-50 text-neutral-500 font-medium border-r border-neutral-100">
+                    Unit Price
                   </span>
-                )}
-              </div>
-
-              {/* MOQ */}
-              <div className="flex items-center gap-2 text-sm text-neutral-600">
-                <span className="font-medium text-neutral-800">Min. Order:</span>
-                <span>{product.moq} units</span>
-              </div>
-
-              {/* Description */}
-              {product.description && (
-                <div>
-                  <p className="text-sm font-medium text-neutral-800 mb-1">Description</p>
-                  <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-line">
-                    {product.description}
-                  </p>
+                  <div className="px-4 py-3 flex items-baseline gap-2">
+                    {discountedPrice ? (
+                      <>
+                        <span className="text-2xl font-bold text-[#FF6A00]">
+                          ${discountedPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        <span className="text-sm text-neutral-400 line-through">
+                          ${Number(product.base_price).toLocaleString()}
+                        </span>
+                        <span className="text-xs font-bold bg-orange-100 text-[#FF6A00] px-2 py-0.5 rounded-full">
+                          -{Number(product.flash_discount_pct).toFixed(0)}% OFF
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-2xl font-bold text-[#FF6A00]">
+                        ${Number(product.base_price).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              )}
+
+                {/* MOQ */}
+                <div className="flex items-center border-b border-neutral-100">
+                  <span className="w-36 shrink-0 px-4 py-3 bg-neutral-50 text-neutral-500 font-medium border-r border-neutral-100">
+                    Min. Order
+                  </span>
+                  <span className="px-4 py-3 text-neutral-800 font-semibold">
+                    {product.moq} {product.moq === 1 ? "unit" : "units"}
+                  </span>
+                </div>
+
+                {/* Sample price */}
+                <div className="flex items-center">
+                  <span className="w-36 shrink-0 px-4 py-3 bg-neutral-50 text-neutral-500 font-medium border-r border-neutral-100">
+                    Sample Price
+                  </span>
+                  <span className="px-4 py-3 text-neutral-800">
+                    {(product as any).sample_price
+                      ? <span className="font-semibold text-[#FF6A00]">${Number((product as any).sample_price).toLocaleString()}</span>
+                      : <span className="text-neutral-400 italic">Contact supplier</span>
+                    }
+                  </span>
+                </div>
+              </div>
 
               {/* Supplier */}
-              <div className="mt-auto pt-5 border-t border-neutral-100">
-                <p className="text-xs text-neutral-400 uppercase tracking-widest mb-1">Supplier</p>
-                <p className="text-sm font-semibold text-neutral-800">{supplierName}</p>
+              <div className="mt-5 flex items-center gap-3 p-4 rounded-xl bg-neutral-50 border border-neutral-100">
+                <div className="w-10 h-10 rounded-full bg-[#FF6A00]/10 flex items-center justify-center shrink-0">
+                  <span className="text-[#FF6A00] font-bold text-sm">
+                    {supplierName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[11px] text-neutral-400 uppercase tracking-widest">Supplier</p>
+                  <p className="text-sm font-semibold text-neutral-800">{supplierName}</p>
+                </div>
               </div>
 
-              {/* CTA buttons */}
-              <ProductActions
-                productId={product.id}
-                productName={product.name}
-                supplierId={supplierId}
-                locale={locale}
-              />
+              {/* CTA buttons — pushed to bottom */}
+              <div className="mt-auto pt-5">
+                <ProductActions
+                  productId={product.id}
+                  productName={product.name}
+                  supplierId={supplierId}
+                  locale={locale}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -172,6 +197,20 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         {/* ── Related Products ── */}
         {related.length > 0 && (
           <RelatedProducts products={related} locale={locale} />
+        )}
+
+        {/* ── Description ── */}
+        {product.description && (
+          <div className="mt-6 bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-neutral-100">
+              <h2 className="text-lg font-bold text-neutral-900">Product Description</h2>
+            </div>
+            <div className="px-6 py-6">
+              <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">
+                {product.description}
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </main>

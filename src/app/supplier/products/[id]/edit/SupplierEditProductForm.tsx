@@ -14,6 +14,7 @@ interface Product {
   category: string;
   base_price: number;
   moq: number;
+  sample_price: number | null;
   image_url: string | null;
   gallery_images: string[];
   is_flash_deal: boolean;
@@ -96,7 +97,7 @@ export default function SupplierEditProductForm({ product, categories }: { produ
 
           <GalleryUploadField defaultImages={product.gallery_images?.length ? product.gallery_images : (product.image_url ? [product.image_url] : [])} />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">Base Price (USD) *</label>
               <input
@@ -117,6 +118,18 @@ export default function SupplierEditProductForm({ product, categories }: { produ
                 min="1"
                 required
                 defaultValue={product.moq}
+                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">Sample Price (USD)</label>
+              <input
+                name="sample_price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Optional"
+                defaultValue={product.sample_price ?? ""}
                 className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#FF6A00]"
               />
             </div>
