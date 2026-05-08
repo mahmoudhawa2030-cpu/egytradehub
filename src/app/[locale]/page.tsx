@@ -11,7 +11,6 @@ import SuppliersScroll from "@/components/landing/SuppliersScroll";
 import RFQForm from "@/components/landing/RFQForm";
 import RecentOrders from "@/components/landing/RecentOrders";
 import BottomNav from "@/components/landing/BottomNav";
-import DesktopHeader from "@/components/landing/DesktopHeader";
 import DesktopHero from "@/components/landing/DesktopHero";
 import DesktopProducts from "@/components/landing/DesktopProducts";
 import DesktopFooter from "@/components/landing/DesktopFooter";
@@ -82,7 +81,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <h1 className="sr-only">
           TradeHub — B2B wholesale marketplace with flash deals, verified suppliers, and RFQ engine.
         </h1>
-        <DesktopHeader categories={categories} />
         <DesktopHero categories={categories} />
         <DesktopProducts trending={products} flashDeals={flashDeals} />
         <DesktopFooter />
