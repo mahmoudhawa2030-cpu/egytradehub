@@ -5,6 +5,7 @@ import { ChevronRight, Home } from "lucide-react";
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductActions from "@/components/product/ProductActions";
 import RelatedProducts from "@/components/product/RelatedProducts";
+import SpecificationsTable from "@/components/product/SpecificationsTable";
 
 export const revalidate = 60;
 
@@ -14,7 +15,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const { data: product, error } = await supabase
     .from("products")
-    .select("id, slug, name, description, category, base_price, moq, sample_price, image_url, gallery_images, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id, profiles!supplier_id(full_name, company_name)")
+    .select("id, slug, name, description, category, base_price, moq, sample_price, specifications, image_url, gallery_images, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id, profiles!supplier_id(full_name, company_name)")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -211,6 +212,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Specifications ── */}
+        {product.specifications && Object.keys(product.specifications).length > 0 && (
+          <div className="mt-6 bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-neutral-100">
+              <h2 className="text-lg font-bold text-neutral-900">Product Specifications</h2>
+            </div>
+            <div className="px-6 py-4">
+              <SpecificationsTable defaultSpecs={product.specifications} readOnly />
             </div>
           </div>
         )}

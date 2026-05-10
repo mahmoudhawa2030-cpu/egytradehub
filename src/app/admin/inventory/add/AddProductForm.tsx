@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, Zap } from "lucide-react";
 import { createProduct } from "@/app/admin/actions";
 import GalleryUploadField from "@/components/admin/GalleryUploadField";
+import SpecificationsTable from "@/components/product/SpecificationsTable";
 
 type Supplier = { user_id: string; full_name: string | null; company_name: string | null };
 
@@ -146,6 +147,15 @@ export default function AddProductForm({
               />
             </div>
           </div>
+        </div>
+
+        {/* Specifications */}
+        <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-neutral-900">Product Specifications</h2>
+            <span className="text-xs text-neutral-500">Optional — Add technical details</span>
+          </div>
+          <SpecificationsTable />
         </div>
 
         {/* Flash Deal */}

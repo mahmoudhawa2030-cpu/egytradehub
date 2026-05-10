@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, Zap } from "lucide-react";
 import { updateProduct } from "@/app/admin/actions";
 import GalleryUploadField from "@/components/admin/GalleryUploadField";
+import SpecificationsTable from "@/components/product/SpecificationsTable";
 
 interface Product {
   id: string;
@@ -15,6 +16,7 @@ interface Product {
   base_price: number;
   moq: number;
   sample_price: number | null;
+  specifications: Record<string, string> | null;
   image_url: string | null;
   gallery_images: string[];
   is_flash_deal: boolean;
@@ -134,6 +136,15 @@ export default function SupplierEditProductForm({ product, categories }: { produ
               />
             </div>
           </div>
+        </div>
+
+        {/* Specifications */}
+        <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-neutral-900">Product Specifications</h2>
+            <span className="text-xs text-neutral-500">Optional — Add technical details</span>
+          </div>
+          <SpecificationsTable defaultSpecs={product.specifications || {}} />
         </div>
 
         {/* Flash Deal */}

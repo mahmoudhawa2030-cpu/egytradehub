@@ -232,6 +232,7 @@ export async function createProduct(formData: FormData) {
     image_url: (formData.get("image_url") as string) || null,
     gallery_images: (() => { try { return JSON.parse((formData.get("gallery_images") as string) || "[]"); } catch { return []; } })(),
     sample_price: formData.get("sample_price") ? parseFloat(formData.get("sample_price") as string) : null,
+    specifications: (() => { try { const s = formData.get("specifications") as string; return s ? JSON.parse(s) : null; } catch { return null; } })(),
     is_flash_deal: formData.get("is_flash_deal") === "true",
     flash_discount_pct: formData.get("flash_discount_pct")
       ? parseFloat(formData.get("flash_discount_pct") as string)
@@ -276,6 +277,7 @@ export async function updateProduct(productId: string, formData: FormData) {
       image_url: (formData.get("image_url") as string) || null,
       gallery_images: (() => { try { return JSON.parse((formData.get("gallery_images") as string) || "[]"); } catch { return []; } })(),
       sample_price: formData.get("sample_price") ? parseFloat(formData.get("sample_price") as string) : null,
+      specifications: (() => { try { const s = formData.get("specifications") as string; return s ? JSON.parse(s) : null; } catch { return null; } })(),
       is_flash_deal: formData.get("is_flash_deal") === "true",
       flash_discount_pct: formData.get("flash_discount_pct")
         ? parseFloat(formData.get("flash_discount_pct") as string)
