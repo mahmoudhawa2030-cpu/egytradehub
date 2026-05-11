@@ -2,6 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import SupplierEditProductForm from "./SupplierEditProductForm";
 
+export function generateStaticParams() {
+  // Static export placeholder - real data would need to be fetched at build time
+  return [{ id: 'placeholder' }];
+}
+
 export default async function SupplierEditProductPage({
   params,
 }: {

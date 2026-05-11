@@ -37,7 +37,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
     formData.set("is_flash_deal", isFlash ? "true" : "false");
     startTransition(async () => {
       const result = await updateProduct(product.id, formData);
-      if (result?.error) {
+      if (result && "error" in result) {
         setError(result.error);
       } else {
         router.push("/admin/inventory");

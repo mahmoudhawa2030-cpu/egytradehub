@@ -20,7 +20,7 @@ export default function SupplierAddProductForm({ categories }: { categories: str
     formData.set("is_flash_deal", isFlash ? "true" : "false");
     startTransition(async () => {
       const result = await createProduct(formData);
-      if (result?.error) {
+      if (result && "error" in result) {
         setError(result.error);
       } else {
         router.push("/supplier/dashboard");

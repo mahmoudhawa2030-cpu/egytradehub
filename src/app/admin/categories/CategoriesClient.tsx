@@ -58,7 +58,7 @@ function CategoryModal({
     fd.append("file", file);
     const result = await uploadCategoryThumbnail(fd);
     setUploading(false);
-    if ("error" in result) { setError(result.error); setPreviewUrl(editing?.thumbnail_url ?? null); return; }
+    if (result && "error" in result) { setError(result.error); setPreviewUrl(editing?.thumbnail_url ?? null); return; }
     setUploadedUrl(result.url);
   }
 
@@ -72,8 +72,8 @@ function CategoryModal({
       const result = isEdit
         ? await updateCategory(editing!.id, formData)
         : await createCategory(formData);
-      if (result?.error) { setError(result.error); return; }
-      if (result?.category) onSaved(result.category as Category);
+      if (result && "error" in result) { setError(result.error); return; }
+      if (result && "category" in result) onSaved(result.category as Category);
       else onClose();
     });
   }

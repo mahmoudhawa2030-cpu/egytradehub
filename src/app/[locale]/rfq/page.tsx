@@ -3,6 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import { ChevronRight, Home, MessageSquare, Clock, CheckCircle2, XCircle } from "lucide-react";
 import RFQSubmitForm from "./RFQSubmitForm";
 
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'ar' }];
+}
+
 export const metadata = {
   title: "Request for Quotation — EgyTradeHub",
   description: "Submit an RFQ and get competitive quotes from verified Egyptian suppliers within 24 hours.",

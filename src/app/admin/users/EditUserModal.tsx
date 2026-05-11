@@ -33,8 +33,8 @@ export default function EditUserModal({ user }: { user: UserProfile }) {
         role: fd.get("role") as string,
         is_verified: fd.get("is_verified") === "true",
       });
-      if (result?.error) {
-        setError(result.error);
+      if (result && "error" in result) {
+        setError(result.error as string);
       } else {
         setOpen(false);
       }

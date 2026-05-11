@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# mobile / android build
+/android
+/dist
+/jdk17
+
+# log files
+*.log
+
+# IDE / OS junk
+/.idea
+/bin
+*.dll
+*.jpg
+*.png
+NOTICE

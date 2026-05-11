@@ -2,6 +2,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Search, Home, ChevronRight, Zap } from "lucide-react";
 
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'ar' }];
+}
+
 export default async function SearchPage({
   params,
   searchParams,

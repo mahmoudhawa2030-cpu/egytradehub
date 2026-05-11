@@ -9,6 +9,34 @@ import SpecificationsTable from "@/components/product/SpecificationsTable";
 
 export const revalidate = 60;
 
+export async function generateStaticParams() {
+  const locales = ['en', 'ar'];
+  
+  // Try to fetch product slugs from database
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data: products } = await supabase
+      .from("products")
+      .select("slug")
+      .limit(100);
+    
+    const slugs = products?.map((p) => p.slug) ?? [];
+    
+    // Generate all locale + slug combinations
+    const params = [];
+    for (const locale of locales) {
+      for (const slug of slugs) {
+        params.push({ locale, slug });
+      }
+    }
+    return params;
+  } catch {
+    // Fallback to empty if database not available at build time
+    return locales.map((locale) => ({ locale, slug: 'sample-product' }));
+  }
+}
+
 export default async function ProductDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
   const supabase = await createClient();
@@ -39,7 +67,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .select("id, slug, name, category, base_price, image_url, gallery_images, is_flash_deal, flash_discount_pct")
     .eq("category", product.category)
     .neq("id", product.id)
-    .limit(5);
+    .limit(3);
   const related = relatedData ?? [];
 
   const discountedPrice = product.is_flash_deal && product.flash_discount_pct

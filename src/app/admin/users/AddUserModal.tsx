@@ -19,7 +19,7 @@ export default function AddUserModal() {
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
       const result = await createAdminUser(formData);
-      if (result?.error) {
+      if (result && "error" in result) {
         setError(result.error);
       } else {
         setOpen(false);

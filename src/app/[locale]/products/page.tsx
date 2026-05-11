@@ -4,6 +4,10 @@ import { Zap, BadgeCheck, ChevronRight, Home } from "lucide-react";
 
 export const revalidate = 30;
 
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'ar' }];
+}
+
 export default async function ProductsPage({
   params,
   searchParams,

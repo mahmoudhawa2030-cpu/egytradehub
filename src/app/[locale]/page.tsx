@@ -1,5 +1,9 @@
 export const revalidate = 60;
 
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'ar' }];
+}
+
 import MobileTopBar from "@/components/landing/MobileTopBar";
 import HeroBanner from "@/components/landing/HeroBanner";
 import FlashDealsBar from "@/components/landing/FlashDealsBar";

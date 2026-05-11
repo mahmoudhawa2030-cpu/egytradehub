@@ -4,6 +4,10 @@ import { getTranslations, isValidLocale } from "@/i18n";
 import { createClient } from "@/lib/supabase/server";
 import DesktopHeader from "@/components/landing/DesktopHeader";
 
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'ar' }];
+}
+
 export default async function LocaleLayout({
   children,
   params,
