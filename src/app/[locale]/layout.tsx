@@ -3,6 +3,7 @@ import { I18nProvider } from "@/i18n/context";
 import { getTranslations, isValidLocale } from "@/i18n";
 import { createClient } from "@/lib/supabase/server";
 import DesktopHeader from "@/components/landing/DesktopHeader";
+import AndroidBackButton from "@/components/AndroidBackButton";
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'ar' }];
@@ -31,6 +32,7 @@ export default async function LocaleLayout({
 
   return (
     <I18nProvider locale={locale} translations={translations}>
+      <AndroidBackButton />
       <div dir={locale === "ar" ? "rtl" : "ltr"} className="contents">
         <div className="hidden lg:block">
           <DesktopHeader categories={categories} />
