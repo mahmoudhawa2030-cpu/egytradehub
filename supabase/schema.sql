@@ -44,6 +44,7 @@ create table if not exists public.products (
   moq integer not null default 1 check (moq > 0),
   image_url text,
   price_tiers jsonb,
+  is_approved boolean not null default false,
   is_flash_deal boolean not null default false,
   flash_starts_at timestamptz,
   flash_ends_at timestamptz,

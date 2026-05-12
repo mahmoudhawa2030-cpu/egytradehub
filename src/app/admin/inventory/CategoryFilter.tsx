@@ -7,20 +7,27 @@ export default function CategoryFilter({
   categories,
   activeCategory,
   totalCount,
+  paramName = "category",
+  basePath = "/admin/inventory",
 }: {
   categories: string[];
   activeCategory: string | undefined;
   totalCount: number;
+  paramName?: string;
+  basePath?: string;
 }) {
   const router = useRouter();
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = e.target.value;
-    router.push(val ? `/admin/inventory?category=${encodeURIComponent(val)}` : "/admin/inventory");
+    const url = val 
+      ? `${basePath}?${paramName}=${encodeURIComponent(val)}` 
+      : basePath;
+    router.push(url);
   }
 
   return (
-    <div className="flex items-center gap-4 mb-6">
+    <div className="flex items-center gap-4 mb-4">
       <div className="relative">
         <select
           value={activeCategory ?? ""}
@@ -37,7 +44,7 @@ export default function CategoryFilter({
       <span className="text-sm text-neutral-500">
         <span className="font-semibold text-neutral-900">{totalCount}</span>{" "}
         {totalCount === 1 ? "product" : "products"}
-        {activeCategory ? ` in "${activeCategory}"` : " total"}
+        {activeCategory ? ` in "${activeCategory}"` : ""}
       </span>
     </div>
   );

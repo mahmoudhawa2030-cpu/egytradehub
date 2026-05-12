@@ -360,3 +360,14 @@ export async function updateRfqStatus(rfqId: string, status: "pending" | "replie
   revalidatePath("/admin/rfqs");
   revalidatePath("/admin/dashboard");
 }
+
+// ── Product Approval ─────────────────────────────────────────
+export async function approveProduct(productId: string): Promise<void> {
+  const supabase = await createClient();
+  await supabase
+    .from("products")
+    .update({ is_approved: true })
+    .eq("id", productId);
+  revalidatePath("/admin/inventory");
+  revalidatePath("/", "layout");
+}

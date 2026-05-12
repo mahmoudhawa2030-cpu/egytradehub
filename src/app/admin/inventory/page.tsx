@@ -1,31 +1,46 @@
 import Link from "next/link";
-import { Plus, Edit, Trash2, Zap, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Zap, Eye, CheckCircle, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { deleteProduct } from "@/app/admin/actions";
+import { deleteProduct, approveProduct } from "@/app/admin/actions";
 import CategoryFilter from "./CategoryFilter";
 
 export default async function InventoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; pendingCategory?: string }>;
 }) {
-  const { category: activeCategory } = await searchParams;
+  const { category: activeCategory, pendingCategory } = await searchParams;
   const supabase = await createClient();
 
+  // Get all categories for filters
   const { data: categoryRows } = await supabase
     .from("products")
-    .select("category")
+    .select("category, is_approved")
     .order("category", { ascending: true });
-  const categories = [...new Set((categoryRows ?? []).map((r) => r.category).filter(Boolean))];
+  
+  const allCategories = [...new Set((categoryRows ?? []).map((r) => r.category).filter(Boolean))];
+  const activeCategories = [...new Set((categoryRows ?? []).filter(r => r.is_approved).map((r) => r.category).filter(Boolean))];
+  const pendingCategories = [...new Set((categoryRows ?? []).filter(r => !r.is_approved).map((r) => r.category).filter(Boolean))];
 
-  let query = supabase
+  // Fetch ACTIVE products
+  let activeQuery = supabase
     .from("products")
     .select("id, slug, name, category, base_price, moq, is_flash_deal, image_url, created_at, profiles!supplier_id(full_name, company_name)")
+    .eq("is_approved", true)
     .order("created_at", { ascending: false });
-  if (activeCategory) query = query.eq("category", activeCategory);
+  if (activeCategory) activeQuery = activeQuery.eq("category", activeCategory);
+  const { data: activeProducts } = await activeQuery;
+  const activeList = activeProducts ?? [];
 
-  const { data: products } = await query;
-  const list = products ?? [];
+  // Fetch PENDING products
+  let pendingQuery = supabase
+    .from("products")
+    .select("id, slug, name, category, base_price, moq, is_flash_deal, image_url, created_at, profiles!supplier_id(full_name, company_name)")
+    .eq("is_approved", false)
+    .order("created_at", { ascending: false });
+  if (pendingCategory) pendingQuery = pendingQuery.eq("category", pendingCategory);
+  const { data: pendingProducts } = await pendingQuery;
+  const pendingList = pendingProducts ?? [];
 
   return (
     <div className="p-8">
@@ -44,89 +59,137 @@ export default async function InventoryPage({
         </Link>
       </div>
 
-      {/* Category Filter */}
-      <CategoryFilter
-        categories={categories}
-        activeCategory={activeCategory}
-        totalCount={list.length}
-      />
+      {/* === ACTIVE PRODUCTS SECTION === */}
+      <div className="mb-10">
+        <div className="flex items-center gap-3 mb-4">
+          <CheckCircle className="w-6 h-6 text-green-600" />
+          <h2 className="text-xl font-bold text-neutral-900">Active Products</h2>
+          <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+            {activeList.length}
+          </span>
+        </div>
+        
+        <CategoryFilter
+          categories={activeCategories}
+          activeCategory={activeCategory}
+          totalCount={activeList.length}
+          paramName="category"
+        />
 
-      {/* Products Table */}
-      <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
-        {list.length === 0 ? (
-          <p className="p-12 text-center text-neutral-400">No products yet. Add one above.</p>
-        ) : (
-          <table className="w-full">
-            <thead className="bg-neutral-50 border-b border-neutral-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Product</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Category</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Price</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">MOQ</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Supplier</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Flash Deal</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-neutral-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {list.map((product) => {
-                const supplier = product.profiles as { full_name?: string; company_name?: string } | null;
-                const supplierName = supplier?.company_name ?? supplier?.full_name ?? "—";
-                return (
-                  <tr key={product.id} className="hover:bg-neutral-50 transition">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-xs text-neutral-400">IMG</div>
-                        )}
-                        <span className="font-medium text-neutral-900 max-w-[200px] truncate">{product.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-neutral-600">{product.category}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-neutral-900">${Number(product.base_price).toLocaleString()}</td>
-                    <td className="px-6 py-4 text-sm text-neutral-600">{product.moq} units</td>
-                    <td className="px-6 py-4 text-sm text-neutral-600">{supplierName}</td>
-                    <td className="px-6 py-4">
-                      {product.is_flash_deal ? (
-                        <span className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-[#FF6A00] rounded-full text-xs font-medium w-fit">
-                          <Zap className="w-3 h-3" /> Flash
-                        </span>
-                      ) : (
-                        <span className="text-neutral-400 text-sm">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/en/products/${product.slug}`}
-                          target="_blank"
-                          className="p-2 hover:bg-blue-50 rounded-lg transition"
-                          title="View product"
-                        >
-                          <Eye className="w-4 h-4 text-blue-500" />
-                        </Link>
-                        <Link
-                          href={`/admin/inventory/${product.id}/edit`}
-                          className="p-2 hover:bg-neutral-100 rounded-lg transition"
-                        >
-                          <Edit className="w-4 h-4 text-neutral-500" />
-                        </Link>
-                        <form action={deleteProduct.bind(null, product.id)}>
-                          <button type="submit" className="p-2 hover:bg-red-50 rounded-lg transition">
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
+        <ProductsTable products={activeList} showApprove={false} />
       </div>
+
+      {/* === PENDING APPROVAL SECTION === */}
+      <div className="mb-10">
+        <div className="flex items-center gap-3 mb-4">
+          <Clock className="w-6 h-6 text-amber-600" />
+          <h2 className="text-xl font-bold text-neutral-900">Pending Approval</h2>
+          <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+            {pendingList.length}
+          </span>
+        </div>
+        
+        <CategoryFilter
+          categories={pendingCategories}
+          activeCategory={pendingCategory}
+          totalCount={pendingList.length}
+          paramName="pendingCategory"
+        />
+
+        <ProductsTable products={pendingList} showApprove={true} />
+      </div>
+    </div>
+  );
+}
+
+// Sub-component for product table
+function ProductsTable({ products, showApprove }: { products: any[]; showApprove: boolean }) {
+  if (products.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-12 text-center text-neutral-400">
+        No products in this section.
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+      <table className="w-full">
+        <thead className="bg-neutral-50 border-b border-neutral-200">
+          <tr>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Product</th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Category</th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Price</th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">MOQ</th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Supplier</th>
+            <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Flash Deal</th>
+            <th className="px-6 py-4 text-right text-sm font-semibold text-neutral-700">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-neutral-100">
+          {products.map((product) => {
+            const supplier = product.profiles as { full_name?: string; company_name?: string } | null;
+            const supplierName = supplier?.company_name ?? supplier?.full_name ?? "—";
+            return (
+              <tr key={product.id} className="hover:bg-neutral-50 transition">
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    {product.image_url ? (
+                      <img src={product.image_url} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-xs text-neutral-400">IMG</div>
+                    )}
+                    <span className="font-medium text-neutral-900 max-w-[200px] truncate">{product.name}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-neutral-600">{product.category}</td>
+                <td className="px-6 py-4 text-sm font-medium text-neutral-900">${Number(product.base_price).toLocaleString()}</td>
+                <td className="px-6 py-4 text-sm text-neutral-600">{product.moq} units</td>
+                <td className="px-6 py-4 text-sm text-neutral-600">{supplierName}</td>
+                <td className="px-6 py-4">
+                  {product.is_flash_deal ? (
+                    <span className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-[#FF6A00] rounded-full text-xs font-medium w-fit">
+                      <Zap className="w-3 h-3" /> Flash
+                    </span>
+                  ) : (
+                    <span className="text-neutral-400 text-sm">—</span>
+                  )}
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <Link
+                      href={`/en/products/${product.slug}`}
+                      target="_blank"
+                      className="p-2 hover:bg-blue-50 rounded-lg transition"
+                      title="View product"
+                    >
+                      <Eye className="w-4 h-4 text-blue-500" />
+                    </Link>
+                    {showApprove && (
+                      <form action={approveProduct.bind(null, product.id)}>
+                        <button type="submit" className="p-2 hover:bg-green-50 rounded-lg transition" title="Approve">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        </button>
+                      </form>
+                    )}
+                    <Link
+                      href={`/admin/inventory/${product.id}/edit`}
+                      className="p-2 hover:bg-neutral-100 rounded-lg transition"
+                    >
+                      <Edit className="w-4 h-4 text-neutral-500" />
+                    </Link>
+                    <form action={deleteProduct.bind(null, product.id)}>
+                      <button type="submit" className="p-2 hover:bg-red-50 rounded-lg transition">
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
