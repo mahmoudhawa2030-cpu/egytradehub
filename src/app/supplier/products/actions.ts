@@ -26,14 +26,16 @@ export async function createSupplierProduct(formData: FormData) {
   if (!user) return { error: "Not authenticated" };
 
   // Verify user is a supplier
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("user_id", user.id)
     .single();
 
+  console.log("[DEBUG] User role:", profile?.role, "Error:", profileError);
+
   if (profile?.role !== "supplier") {
-    return { error: "Only suppliers can add products" };
+    return { error: `Only suppliers can add products. Your role: ${profile?.role || 'unknown'}` };
   }
 
   const name = formData.get("name") as string;
@@ -60,7 +62,11 @@ export async function createSupplierProduct(formData: FormData) {
     flash_ends_at: (formData.get("flash_ends_at") as string) || null,
   });
 
-  if (error) return { error: error.message };
+  if (error) {
+    console.log("[DEBUG] Insert error:", error);
+    return { error: error.message };
+  }
+  console.log("[DEBUG] Product inserted with is_approved: false");
   revalidatePath("/admin/inventory");
   revalidatePath("/", "layout");
   revalidatePath("/supplier/dashboard");
