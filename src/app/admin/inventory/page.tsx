@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus, Edit, Trash2, Zap, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { deleteProduct } from "@/app/admin/actions";
+import CategoryFilter from "./CategoryFilter";
 
 export default async function InventoryPage({
   searchParams,
@@ -44,29 +45,11 @@ export default async function InventoryPage({
       </div>
 
       {/* Category Filter */}
-      {categories.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Link
-            href="/admin/inventory"
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-              !activeCategory ? "bg-[#FF6A00] text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-            }`}
-          >
-            All
-          </Link>
-          {categories.map((cat) => (
-            <Link
-              key={cat}
-              href={`/admin/inventory?category=${encodeURIComponent(cat)}`}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                activeCategory === cat ? "bg-[#FF6A00] text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-              }`}
-            >
-              {cat}
-            </Link>
-          ))}
-        </div>
-      )}
+      <CategoryFilter
+        categories={categories}
+        activeCategory={activeCategory}
+        totalCount={list.length}
+      />
 
       {/* Products Table */}
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
