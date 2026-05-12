@@ -67,7 +67,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .select("id, slug, name, category, base_price, image_url, gallery_images, is_flash_deal, flash_discount_pct")
     .eq("category", product.category)
     .neq("id", product.id)
-    .limit(3);
+    .limit(25);
   const related = relatedData ?? [];
 
   const discountedPrice = product.is_flash_deal && product.flash_discount_pct
