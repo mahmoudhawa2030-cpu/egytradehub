@@ -3,13 +3,27 @@ import { Plus, Edit, Trash2, Zap, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { deleteProduct } from "@/app/admin/actions";
 
-export default async function InventoryPage() {
+export default async function InventoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category: activeCategory } = await searchParams;
   const supabase = await createClient();
-  const { data: products } = await supabase
+
+  const { data: categoryRows } = await supabase
+    .from("products")
+    .select("category")
+    .order("category", { ascending: true });
+  const categories = [...new Set((categoryRows ?? []).map((r) => r.category).filter(Boolean))];
+
+  let query = supabase
     .from("products")
     .select("id, slug, name, category, base_price, moq, is_flash_deal, image_url, created_at, profiles!supplier_id(full_name, company_name)")
     .order("created_at", { ascending: false });
+  if (activeCategory) query = query.eq("category", activeCategory);
 
+  const { data: products } = await query;
   const list = products ?? [];
 
   return (
@@ -28,6 +42,31 @@ export default async function InventoryPage() {
           Add Product
         </Link>
       </div>
+
+      {/* Category Filter */}
+      {categories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Link
+            href="/admin/inventory"
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+              !activeCategory ? "bg-[#FF6A00] text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+            }`}
+          >
+            All
+          </Link>
+          {categories.map((cat) => (
+            <Link
+              key={cat}
+              href={`/admin/inventory?category=${encodeURIComponent(cat)}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                activeCategory === cat ? "bg-[#FF6A00] text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+              }`}
+            >
+              {cat}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Products Table */}
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
