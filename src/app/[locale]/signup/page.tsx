@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, Lock, User, Building2, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Mail, Lock, User, Building2, Phone, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/i18n/context";
 
@@ -21,6 +21,7 @@ export default function SignupPage() {
     fullName: "",
     companyName: "",
     country: "",
+    phone: "",
     role: "buyer" as ProfileRole,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -40,10 +41,12 @@ export default function SignupPage() {
       email: form.email,
       password: form.password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: form.fullName,
           company_name: form.companyName,
           country: form.country,
+          phone: form.phone,
           role: form.role,
         },
       },
@@ -53,12 +56,6 @@ export default function SignupPage() {
     if (!authData.user) { setState("error"); setErrorMsg("Failed to create account."); return; }
 
     setState("success");
-    setTimeout(() => {
-      if (form.role === "admin") router.push(`/admin/dashboard`);
-      else if (form.role === "supplier") router.push(`/supplier/dashboard`);
-      else router.push(`/${locale}`);
-      router.refresh();
-    }, 1500);
   }
 
   if (state === "success") {
@@ -68,8 +65,11 @@ export default function SignupPage() {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-display font-bold text-neutral-900 mb-2">{t.auth.accountCreated}</h2>
-          <p className="text-neutral-600">{t.auth.redirecting}</p>
+          <h2 className="text-2xl font-display font-bold text-neutral-900 mb-2">Verify Your Email</h2>
+          <p className="text-neutral-600 mb-4">We&apos;ve sent a confirmation link to <strong>{form.email}</strong>. Please check your inbox and click the link to activate your account.</p>
+          <Link href={`/${locale}/login`} className="text-[#FF6A00] font-semibold hover:underline">
+            Go to Login
+          </Link>
         </div>
       </div>
     );
@@ -126,6 +126,16 @@ export default function SignupPage() {
               <input type="text" required value={form.country} onChange={(e) => update("country", e.target.value)}
                 placeholder="Egypt"
                 className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#FF6A00] focus:ring-2 focus:ring-orange-100" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">Phone Number *</label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+              <input type="tel" required value={form.phone} onChange={(e) => update("phone", e.target.value)}
+                placeholder="+20 123 456 7890"
+                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#FF6A00] focus:ring-2 focus:ring-orange-100" />
             </div>
           </div>
 

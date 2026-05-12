@@ -25,6 +25,7 @@ begin
     full_name,
     company_name,
     country,
+    phone,
     role,
     is_verified,
     is_banned
@@ -33,6 +34,7 @@ begin
     new.raw_user_meta_data->>'full_name',
     new.raw_user_meta_data->>'company_name',
     new.raw_user_meta_data->>'country',
+    new.raw_user_meta_data->>'phone',
     _role,
     false,
     false

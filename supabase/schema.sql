@@ -25,6 +25,7 @@ create table if not exists public.profiles (
   full_name text,
   company_name text,
   country text,
+  phone text,
   is_verified boolean not null default false,
   is_banned boolean not null default false,
   created_at timestamptz not null default now()
