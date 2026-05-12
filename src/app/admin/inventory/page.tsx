@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Edit, Trash2, Zap } from "lucide-react";
+import { Plus, Edit, Trash2, Zap, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { deleteProduct } from "@/app/admin/actions";
 
@@ -7,7 +7,7 @@ export default async function InventoryPage() {
   const supabase = await createClient();
   const { data: products } = await supabase
     .from("products")
-    .select("id, name, category, base_price, moq, is_flash_deal, image_url, created_at, profiles!supplier_id(full_name, company_name)")
+    .select("id, slug, name, category, base_price, moq, is_flash_deal, image_url, created_at, profiles!supplier_id(full_name, company_name)")
     .order("created_at", { ascending: false });
 
   const list = products ?? [];
@@ -77,6 +77,14 @@ export default async function InventoryPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/en/products/${product.slug}`}
+                          target="_blank"
+                          className="p-2 hover:bg-blue-50 rounded-lg transition"
+                          title="View product"
+                        >
+                          <Eye className="w-4 h-4 text-blue-500" />
+                        </Link>
                         <Link
                           href={`/admin/inventory/${product.id}/edit`}
                           className="p-2 hover:bg-neutral-100 rounded-lg transition"
