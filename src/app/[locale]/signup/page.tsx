@@ -88,11 +88,10 @@ export default function SignupPage() {
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-neutral-700 mb-2">{t.auth.iWantTo}</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {([
               { id: "buyer", label: t.auth.buyProducts, icon: User },
               { id: "supplier", label: t.auth.sellProducts, icon: Building2 },
-              { id: "admin", label: t.auth.manage, icon: Building2 },
             ] as const).map(({ id, label, icon: Icon }) => {
               const active = form.role === id;
               return (
