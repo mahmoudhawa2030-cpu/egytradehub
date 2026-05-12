@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Zap, CheckCircle } from "lucide-react";
-import { createProduct } from "@/app/admin/actions";
+import { createSupplierProduct } from "../actions";
 import GalleryUploadField from "@/components/admin/GalleryUploadField";
 import SpecificationsTable from "@/components/product/SpecificationsTable";
 
@@ -21,9 +21,9 @@ export default function SupplierAddProductForm({ categories }: { categories: str
     const formData = new FormData(e.currentTarget);
     formData.set("is_flash_deal", isFlash ? "true" : "false");
     startTransition(async () => {
-      const result = await createProduct(formData);
+      const result = await createSupplierProduct(formData);
       if (result && "error" in result) {
-        setError(result.error);
+        setError(result.error ?? null);
       } else {
         setIsApproved(result?.isApproved ?? false);
         setSuccess(true);
