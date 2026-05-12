@@ -49,7 +49,8 @@ export default async function ProductsPage({
   // ── Fetch products ─────────────────────────────────────────────
   let query = supabase
     .from("products")
-    .select("id, slug, name, category, base_price, moq, image_url, is_flash_deal, profiles!supplier_id(full_name, company_name)")
+    .select("*, profiles!supplier_id(full_name, company_name)")
+    .eq("is_approved", true)
     .order("created_at", { ascending: false });
 
   if (activeSubName) {

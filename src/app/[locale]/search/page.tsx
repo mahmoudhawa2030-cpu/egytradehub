@@ -20,12 +20,15 @@ export default async function SearchPage({
   let products: any[] = [];
 
   if (q.trim()) {
-    const { data } = await supabase
+    let query = supabase
       .from("products")
-      .select("id, slug, name, category, base_price, image_url, gallery_images, is_flash_deal, flash_discount_pct, profiles!supplier_id(full_name, company_name)")
-      .or(`name.ilike.%${q}%,description.ilike.%${q}%,category.ilike.%${q}%`)
-      .order("created_at", { ascending: false })
-      .limit(40);
+      .select("id, slug, name, category, base_price, image_url, gallery_images, is_flash_deal, flash_discount_pct, profiles!supplier_id(full_name, company_name)", { count: "exact" })
+      .eq("is_approved", true)
+      .order("created_at", { ascending: false });
+
+    query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%,category.ilike.%${q}%`).limit(40);
+
+    const { data } = await query;
     products = data ?? [];
   }
 

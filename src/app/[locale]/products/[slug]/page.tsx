@@ -45,6 +45,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .from("products")
     .select("id, slug, name, description, category, base_price, moq, sample_price, specifications, image_url, gallery_images, is_flash_deal, flash_discount_pct, flash_starts_at, flash_ends_at, supplier_id, profiles!supplier_id(full_name, company_name)")
     .eq("slug", slug)
+    .eq("is_approved", true)
     .maybeSingle();
 
   if (error) {
