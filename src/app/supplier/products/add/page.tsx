@@ -5,7 +5,7 @@ import SupplierAddProductForm from "./SupplierAddProductForm";
 export default async function SupplierAddProductPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/en/login");
+  if (!user) redirect("/en/login?redirect=/supplier/products/add");
 
   const { data } = await supabase
     .from("categories")

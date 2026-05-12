@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, FormEvent } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useState, FormEvent, Suspense } from "react";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -9,10 +9,12 @@ import { useI18n } from "@/i18n/context";
 
 type State = "idle" | "loading" | "error";
 
-export default function LoginPage() {
+function LoginForm() {
   const { t, locale } = useI18n();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+  const redirectUrl = searchParams.get("redirect");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,6 +36,12 @@ export default function LoginPage() {
     }
 
     if (data.user) {
+      // If redirect URL is provided, use it
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -153,5 +161,18 @@ export default function LoginPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+// Wrapper with Suspense for useSearchParams
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-4">
+        <div className="w-8 h-8 border-2 border-[#FF6A00] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
