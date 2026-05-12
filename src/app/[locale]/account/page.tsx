@@ -12,6 +12,7 @@ import {
   LogOut,
   ShieldCheck,
   ChevronRight,
+  PlusCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/i18n/context";
@@ -74,6 +75,7 @@ export default function AccountPage() {
     { icon: Package,      label: t.common.myOrders,  href: `/${locale}/orders` },
     { icon: MessageSquare,label: t.common.messages,  href: `/${locale}/messages` },
     { icon: Heart,        label: t.common.wishlist,  href: `/${locale}/wishlist` },
+    { icon: PlusCircle,   label: "Add Product",      href: `/supplier/products/add` },
     { icon: Settings,     label: "Settings",         href: `/${locale}/account/settings` },
   ];
 
