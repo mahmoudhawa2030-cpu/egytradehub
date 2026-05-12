@@ -32,11 +32,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     supabase
       .from("products")
       .select("id, slug, name, category, base_price, moq, image_url, is_flash_deal, flash_discount_pct, profiles!supplier_id(full_name, company_name)")
+      .eq("is_approved", true)
       .order("created_at", { ascending: false })
       .limit(8),
     supabase
       .from("products")
       .select("id, slug, name, category, base_price, moq, image_url, is_flash_deal, flash_discount_pct, profiles!supplier_id(full_name, company_name)")
+      .eq("is_approved", true)
       .eq("is_flash_deal", true)
       .order("created_at", { ascending: false })
       .limit(8),

@@ -44,6 +44,15 @@ next-env.d.ts
 /android
 /dist
 /jdk17
+/jdk17.zip
+/conf
+/include
+/jmods
+/legal
+/lib
+/release
+next.config.mobile.ts
+next.config.ts.backup
 
 # log files
 *.log

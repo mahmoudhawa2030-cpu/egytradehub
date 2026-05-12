@@ -66,6 +66,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const { data: relatedData } = await supabase
     .from("products")
     .select("id, slug, name, category, base_price, image_url, gallery_images, is_flash_deal, flash_discount_pct")
+    .eq("is_approved", true)
     .eq("category", product.category)
     .neq("id", product.id)
     .limit(25);
