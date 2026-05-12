@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, Zap } from "lucide-react";
+import { ArrowLeft, Save, Zap, CheckCircle } from "lucide-react";
 import { createProduct } from "@/app/admin/actions";
 import GalleryUploadField from "@/components/admin/GalleryUploadField";
 import SpecificationsTable from "@/components/product/SpecificationsTable";
@@ -13,6 +13,8 @@ export default function SupplierAddProductForm({ categories }: { categories: str
   const [isPending, startTransition] = useTransition();
   const [isFlash, setIsFlash] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -23,7 +25,9 @@ export default function SupplierAddProductForm({ categories }: { categories: str
       if (result && "error" in result) {
         setError(result.error);
       } else {
-        router.push("/supplier/dashboard");
+        setIsApproved(result?.isApproved ?? false);
+        setSuccess(true);
+        setTimeout(() => router.push("/supplier/dashboard"), 3000);
       }
     });
   }
@@ -42,6 +46,20 @@ export default function SupplierAddProductForm({ categories }: { categories: str
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+      )}
+
+      {success && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center gap-2 text-green-700 font-semibold mb-2">
+            <CheckCircle className="w-5 h-5" />
+            Product submitted successfully!
+          </div>
+          {!isApproved && (
+            <p className="text-sm text-green-600">
+              Your product is pending approval. It will be visible after review by our team.
+            </p>
+          )}
+        </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">

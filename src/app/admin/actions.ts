@@ -246,7 +246,7 @@ export async function createProduct(formData: FormData) {
   revalidatePath("/admin/inventory");
   revalidatePath("/", "layout");
   revalidatePath("/[locale]/products", "page");
-  return { success: true };
+  return { success: true, isApproved: isSupervisorOrAdmin };
 }
 
 export async function updateProduct(productId: string, formData: FormData) {
