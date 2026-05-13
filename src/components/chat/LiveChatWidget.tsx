@@ -10,6 +10,7 @@ export default function LiveChatWidget() {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,41 +29,69 @@ export default function LiveChatWidget() {
     if (!message.trim() || !user) return;
 
     setIsSending(true);
+    setError(null);
     const supabase = createClient();
 
-    // Find an admin/supervisor to send message to
-    const { data: admins } = await supabase
-      .from("profiles")
-      .select("user_id")
-      .in("role", ["admin", "supervisor"])
-      .limit(1);
+    try {
+      // Find an admin/supervisor to send message to
+      const { data: admins, error: adminError } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .in("role", ["admin", "supervisor"])
+        .limit(1);
 
-    if (!admins || admins.length === 0) {
-      setIsSending(false);
-      return;
-    }
+      if (adminError) {
+        console.error("Error finding admin:", adminError);
+        setError("Could not find support team. Please try again.");
+        setIsSending(false);
+        return;
+      }
 
-    const adminId = admins[0].user_id;
+      if (!admins || admins.length === 0) {
+        setError("No support team available right now.");
+        setIsSending(false);
+        return;
+      }
 
-    // Create conversation
-    const { data: conv } = await supabase
-      .from("conversations")
-      .insert({
-        buyer_id: user.id,
-        supplier_id: adminId,
-      })
-      .select()
-      .single();
+      const adminId = admins[0].user_id;
 
-    if (conv) {
-      await supabase.from("messages").insert({
-        conversation_id: conv.id,
-        sender_id: user.id,
-        content: message.trim(),
-      });
+      // Create conversation
+      const { data: conv, error: convError } = await supabase
+        .from("conversations")
+        .insert({
+          buyer_id: user.id,
+          supplier_id: adminId,
+        })
+        .select()
+        .single();
 
-      setSent(true);
-      setMessage("");
+      if (convError) {
+        console.error("Error creating conversation:", convError);
+        setError("Failed to start conversation. Please try again.");
+        setIsSending(false);
+        return;
+      }
+
+      if (conv) {
+        const { error: msgError } = await supabase.from("messages").insert({
+          conversation_id: conv.id,
+          sender_id: user.id,
+          content: message.trim(),
+        });
+
+        if (msgError) {
+          console.error("Error sending message:", msgError);
+          setError("Failed to send message. Please try again.");
+          setIsSending(false);
+          return;
+        }
+
+        setSent(true);
+        setMessage("");
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      setError("Something went wrong. Please try again.");
     }
 
     setIsSending(false);
@@ -155,6 +184,11 @@ export default function LiveChatWidget() {
                     👋 Hi there! How can we help you today?
                   </p>
                 </div>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
                 <form onSubmit={handleSend} className="space-y-3">
                   <textarea
                     value={message}
