@@ -26,6 +26,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/supplier") ||
+    pathname.startsWith("/supervisor") ||
     /\.(.+)$/.test(pathname);
 
   if (!isInternal) {
@@ -51,6 +52,7 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/admin") ||
     pathname.startsWith("/supplier") ||
+    pathname.startsWith("/supervisor") ||
     pathname.startsWith("/api")
   ) {
     return NextResponse.next({ request: { headers: request.headers } });
