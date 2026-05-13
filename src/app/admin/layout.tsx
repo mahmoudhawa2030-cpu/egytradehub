@@ -25,11 +25,12 @@ async function getUserRoleAndMessages(): Promise<{ role: string | null; loggedIn
     .eq("user_id", user.id)
     .single();
 
-  // Count messages received by this admin/supervisor
+  // Count unread messages received by this admin/supervisor
   const { count } = await supabase
     .from("messages")
     .select("*", { count: "exact", head: true })
-    .eq("receiver_id", user.id);
+    .eq("receiver_id", user.id)
+    .eq("is_read", false);
 
   return { role: profile?.role ?? null, loggedIn: true, unreadCount: count ?? 0 };
 }
@@ -41,7 +42,7 @@ const navItems = (unreadCount: number) => [
   { icon: Users,           label: "Suppliers",  href: "/admin/suppliers" },
   { icon: ShoppingCart,    label: "Orders",     href: "/admin/orders" },
   { icon: MessageSquare,   label: "RFQs",       href: "/admin/rfqs" },
-  { icon: MessageSquare,   label: "Messages",   href: "/en/messages", badge: unreadCount > 0 ? unreadCount : null },
+  { icon: MessageSquare,   label: "Messages",   href: "/supervisor/chat", badge: unreadCount > 0 ? unreadCount : null },
   { icon: Users,           label: "Users",      href: "/admin/users" },
   { icon: Users,           label: "Supervisors", href: "/admin/supervisors" },
   { icon: BarChart3,       label: "Analytics",  href: "/admin/analytics" },

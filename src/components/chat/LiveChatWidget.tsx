@@ -55,10 +55,15 @@ export default function LiveChatWidget() {
 
       const adminId = admins[0].user_id;
 
-      // Send message directly using existing messages table schema
+      // Generate room_id (sorted UUIDs to ensure consistency between users)
+      const sortedIds = [user.id, adminId].sort();
+      const roomId = `user:${sortedIds[0]}:${sortedIds[1]}`;
+
+      // Send message using existing messages table schema
       const { error: msgError } = await supabase.from("messages").insert({
         sender_id: user.id,
         receiver_id: adminId,
+        room_id: roomId,
         content: message.trim(),
       });
 
