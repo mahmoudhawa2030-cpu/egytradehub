@@ -13,11 +13,11 @@ import {
   Tag,
 } from "lucide-react";
 
-async function getUserRole(): Promise<{ role: string | null; loggedIn: boolean }> {
+async function getUserRoleAndMessages(): Promise<{ role: string | null; loggedIn: boolean; unreadCount: number }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) return { role: null, loggedIn: false };
+  if (!user) return { role: null, loggedIn: false, unreadCount: 0 };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -25,16 +25,24 @@ async function getUserRole(): Promise<{ role: string | null; loggedIn: boolean }
     .eq("user_id", user.id)
     .single();
 
-  return { role: profile?.role ?? null, loggedIn: true };
+  // Count unread messages for admin/supervisor
+  const { count } = await supabase
+    .from("messages")
+    .select("*", { count: "exact", head: true })
+    .eq("read", false)
+    .neq("sender_id", user.id);
+
+  return { role: profile?.role ?? null, loggedIn: true, unreadCount: count ?? 0 };
 }
 
-const navItems = [
+const navItems = (unreadCount: number) => [
   { icon: LayoutDashboard, label: "Dashboard",  href: "/admin/dashboard" },
   { icon: Package,         label: "Inventory",  href: "/admin/inventory" },
   { icon: Tag,             label: "Categories", href: "/admin/categories" },
   { icon: Users,           label: "Suppliers",  href: "/admin/suppliers" },
   { icon: ShoppingCart,    label: "Orders",     href: "/admin/orders" },
   { icon: MessageSquare,   label: "RFQs",       href: "/admin/rfqs" },
+  { icon: MessageSquare,   label: "Messages",   href: "/en/messages", badge: unreadCount > 0 ? unreadCount : null },
   { icon: Users,           label: "Users",      href: "/admin/users" },
   { icon: Users,           label: "Supervisors", href: "/admin/supervisors" },
   { icon: BarChart3,       label: "Analytics",  href: "/admin/analytics" },
@@ -46,7 +54,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { role, loggedIn } = await getUserRole();
+  const { role, loggedIn, unreadCount } = await getUserRoleAndMessages();
 
   if (!loggedIn) {
     redirect("/en/login");
@@ -74,7 +82,7 @@ export default async function AdminLayout({
         
         <nav className="p-4">
           <ul className="space-y-1">
-            {navItems.map(({ icon: Icon, label, href }) => (
+            {navItems(unreadCount).map(({ icon: Icon, label, href, badge }) => (
               <li key={href}>
                 <Link
                   href={href}
@@ -82,6 +90,11 @@ export default async function AdminLayout({
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{label}</span>
+                  {badge && (
+                    <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {badge}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}
