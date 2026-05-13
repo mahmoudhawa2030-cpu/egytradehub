@@ -55,40 +55,22 @@ export default function LiveChatWidget() {
 
       const adminId = admins[0].user_id;
 
-      // Create conversation
-      const { data: conv, error: convError } = await supabase
-        .from("conversations")
-        .insert({
-          buyer_id: user.id,
-          supplier_id: adminId,
-        })
-        .select()
-        .single();
+      // Send message directly using existing messages table schema
+      const { error: msgError } = await supabase.from("messages").insert({
+        sender_id: user.id,
+        receiver_id: adminId,
+        content: message.trim(),
+      });
 
-      if (convError) {
-        console.error("Error creating conversation:", convError);
-        setError("Failed to start conversation. Please try again.");
+      if (msgError) {
+        console.error("Error sending message:", msgError);
+        setError(`Failed to send: ${msgError.message}`);
         setIsSending(false);
         return;
       }
 
-      if (conv) {
-        const { error: msgError } = await supabase.from("messages").insert({
-          conversation_id: conv.id,
-          sender_id: user.id,
-          content: message.trim(),
-        });
-
-        if (msgError) {
-          console.error("Error sending message:", msgError);
-          setError("Failed to send message. Please try again.");
-          setIsSending(false);
-          return;
-        }
-
-        setSent(true);
-        setMessage("");
-      }
+      setSent(true);
+      setMessage("");
     } catch (err) {
       console.error("Unexpected error:", err);
       setError("Something went wrong. Please try again.");

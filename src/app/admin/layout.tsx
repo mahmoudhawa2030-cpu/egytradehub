@@ -25,12 +25,11 @@ async function getUserRoleAndMessages(): Promise<{ role: string | null; loggedIn
     .eq("user_id", user.id)
     .single();
 
-  // Count unread messages for admin/supervisor
+  // Count messages received by this admin/supervisor
   const { count } = await supabase
     .from("messages")
     .select("*", { count: "exact", head: true })
-    .eq("read", false)
-    .neq("sender_id", user.id);
+    .eq("receiver_id", user.id);
 
   return { role: profile?.role ?? null, loggedIn: true, unreadCount: count ?? 0 };
 }
