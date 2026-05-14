@@ -29,16 +29,16 @@ export default function FlashDealsScroll({ deals, locale }: { deals: DbDeal[]; l
             href={`/${locale}/products/${d.slug ?? d.id}`}
             className="flex-shrink-0 w-[148px] bg-white rounded-2xl overflow-hidden border border-neutral-200"
           >
-            <div className={`h-[90px] flex items-center justify-center relative overflow-hidden ${!d.image_url ? BG_CYCLE[i % BG_CYCLE.length] : ""}`}>
+            <div className={`h-[110px] bg-white flex items-center justify-center relative overflow-hidden ${!d.image_url ? BG_CYCLE[i % BG_CYCLE.length] : ""}`}>
               {discount > 0 && (
-                <span className="absolute top-1.5 left-1.5 bg-[#FF6A00] text-white text-[9.5px] font-bold px-1.5 py-0.5 rounded z-10">
+                <span className="absolute top-2 left-2 bg-[#FF6A00] text-white text-[9.5px] font-bold px-2 py-0.5 rounded z-10">
                   -{discount.toFixed(0)}%
                 </span>
               )}
               {d.image_url ? (
-                <img src={d.image_url} alt={d.name} className="w-full h-full object-contain p-2" />
+                <img src={d.image_url} alt={d.name} className="w-full h-full object-contain" />
               ) : (
-                <Package className="w-10 h-10 text-neutral-500/60" strokeWidth={1.5} />
+                <Package className="w-12 h-12 text-neutral-500/60" strokeWidth={1.5} />
               )}
             </div>
             <div className="px-2.5 py-2">

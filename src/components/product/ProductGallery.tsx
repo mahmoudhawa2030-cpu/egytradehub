@@ -91,7 +91,7 @@ export default function ProductGallery({ images, productName, isFlashDeal }: Pro
                     <img
                       src={src}
                       alt={`${productName} ${realIdx + 1}`}
-                      className="w-full h-full object-contain p-1"
+                      className="w-full h-full object-contain"
                     />
                   </button>
                 );
@@ -113,7 +113,7 @@ export default function ProductGallery({ images, productName, isFlashDeal }: Pro
         )}
 
         {/* ── Main image ── */}
-        <div className="relative bg-neutral-50 rounded-xl overflow-hidden flex-1 lg:flex-none"
+        <div className="relative bg-white rounded-xl overflow-hidden flex-1 lg:flex-none"
           style={{ height: 340, minHeight: 260 }}
         >
           <div className="w-full h-full" style={{ minHeight: 260 }}>
@@ -121,7 +121,7 @@ export default function ProductGallery({ images, productName, isFlashDeal }: Pro
               <img
                 src={activeImage}
                 alt={productName}
-                className="w-full h-full object-contain p-2"
+                className="w-full h-full object-contain"
                 style={{ minHeight: 260 }}
               />
             ) : (
@@ -177,7 +177,7 @@ export default function ProductGallery({ images, productName, isFlashDeal }: Pro
               <img
                 src={src}
                 alt={`${productName} ${i + 1}`}
-                className="w-full h-full object-contain p-1"
+                className="w-full h-full object-contain"
               />
             </button>
           ))}

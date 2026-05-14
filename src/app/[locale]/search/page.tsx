@@ -110,12 +110,12 @@ export default async function SearchPage({
                   className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-md hover:border-[#FF6A00]/40 transition-all"
                 >
                   {/* Image */}
-                  <div className="relative aspect-square bg-neutral-50 overflow-hidden">
+                  <div className="relative aspect-square bg-white overflow-hidden">
                     {thumb ? (
                       <img
                         src={thumb}
                         alt={p.name}
-                        className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-neutral-200">

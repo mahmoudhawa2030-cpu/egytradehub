@@ -181,7 +181,7 @@ export default async function ProductsPage({
                 >
                   <div className="h-44 bg-white flex items-center justify-center relative">
                     {product.image_url ? (
-                      <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-3" />
+                      <img src={product.image_url} alt={product.name} className="w-full h-full object-contain" />
                     ) : (
                       <span className="text-xs text-neutral-400">No image</span>
                     )}

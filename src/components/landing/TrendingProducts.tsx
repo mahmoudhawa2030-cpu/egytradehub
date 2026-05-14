@@ -33,19 +33,19 @@ export default function TrendingProducts({ products, locale }: { products: DbPro
               href={`/${locale}/products/${p.slug ?? p.id}`}
               className="bg-white rounded-2xl overflow-hidden border border-neutral-200 cursor-pointer block"
             >
-              <div className={`h-[102px] flex items-center justify-center relative overflow-hidden ${!p.image_url ? BG_CYCLE[i % BG_CYCLE.length] : ""}`}>
+              <div className={`h-[140px] bg-white flex items-center justify-center relative overflow-hidden ${!p.image_url ? BG_CYCLE[i % BG_CYCLE.length] : ""}`}>
                 {p.is_flash_deal && (
-                  <span className="absolute top-1.5 left-1.5 text-[9.5px] px-1.5 py-0.5 rounded font-semibold bg-[#FF6A00] text-white z-10">
+                  <span className="absolute top-2 left-2 text-[9.5px] px-2 py-1 rounded font-semibold bg-[#FF6A00] text-white z-10">
                     Flash
                   </span>
                 )}
-                <span className="absolute top-1.5 right-1.5 w-6 h-6 bg-white/95 rounded-full flex items-center justify-center shadow z-10">
-                  <Heart className="w-3 h-3 text-[#FF6A00]" strokeWidth={2} />
+                <span className="absolute top-2 right-2 w-7 h-7 bg-white/95 rounded-full flex items-center justify-center shadow z-10">
+                  <Heart className="w-3.5 h-3.5 text-[#FF6A00]" strokeWidth={2} />
                 </span>
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} className="w-full h-full object-contain p-2" />
+                  <img src={p.image_url} alt={p.name} className="w-full h-full object-contain" />
                 ) : (
-                  <Package className="w-10 h-10 text-neutral-500/60" strokeWidth={1.5} />
+                  <Package className="w-12 h-12 text-neutral-500/60" strokeWidth={1.5} />
                 )}
               </div>
               <div className="px-2.5 py-2">
