@@ -73,7 +73,7 @@ export default function RelatedProducts({ products, locale }: RelatedProductsPro
                 <p className="text-[11px] text-[#FF6A00] font-semibold uppercase tracking-wide mb-0.5 truncate">
                   {p.category}
                 </p>
-                <p className="text-sm font-semibold text-neutral-800 line-clamp-2 leading-snug mb-2">
+                <p className="text-sm font-semibold text-neutral-800 line-clamp-1 truncate mb-2">
                   {p.name}
                 </p>
                 <div className="flex items-baseline gap-1.5">

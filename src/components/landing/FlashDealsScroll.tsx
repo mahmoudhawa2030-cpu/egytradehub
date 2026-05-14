@@ -42,7 +42,7 @@ export default function FlashDealsScroll({ deals, locale }: { deals: DbDeal[]; l
               )}
             </div>
             <div className="px-2.5 py-2">
-              <div className="text-[11.5px] text-neutral-900 leading-snug line-clamp-2 mb-1 min-h-[2.6em]">
+              <div className="text-[11.5px] text-neutral-900 leading-snug line-clamp-1 truncate mb-1">
                 {d.name}
               </div>
               <div className="text-sm font-semibold text-[#FF6A00]">
