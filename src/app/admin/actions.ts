@@ -251,6 +251,16 @@ export async function createProduct(formData: FormData) {
 
 export async function updateProduct(productId: string, formData: FormData) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  // Determine caller role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+  const isSupervisorOrAdmin = profile?.role === "admin" || profile?.role === "supervisor";
 
   const name = formData.get("name") as string;
 
@@ -266,33 +276,40 @@ export async function updateProduct(productId: string, formData: FormData) {
     slug = await generateUniqueProductSlug(supabase, name, productId);
   }
 
+  const updateData: any = {
+    name,
+    slug,
+    description: formData.get("description") as string,
+    category: formData.get("category") as string,
+    base_price: parseFloat(formData.get("base_price") as string),
+    moq: parseInt(formData.get("moq") as string, 10),
+    image_url: (formData.get("image_url") as string) || null,
+    gallery_images: (() => { try { return JSON.parse((formData.get("gallery_images") as string) || "[]"); } catch { return []; } })(),
+    sample_price: formData.get("sample_price") ? parseFloat(formData.get("sample_price") as string) : null,
+    specifications: (() => { try { const s = formData.get("specifications") as string; return s ? JSON.parse(s) : null; } catch { return null; } })(),
+    is_flash_deal: formData.get("is_flash_deal") === "true",
+    flash_discount_pct: formData.get("flash_discount_pct")
+      ? parseFloat(formData.get("flash_discount_pct") as string)
+      : null,
+    flash_starts_at: (formData.get("flash_starts_at") as string) || null,
+    flash_ends_at: (formData.get("flash_ends_at") as string) || null,
+  };
+
+  // Suppliers must re-submit for approval after editing
+  if (!isSupervisorOrAdmin) {
+    updateData.is_approved = false;
+  }
+
   const { error } = await supabase
     .from("products")
-    .update({
-      name,
-      slug,
-      description: formData.get("description") as string,
-      category: formData.get("category") as string,
-      base_price: parseFloat(formData.get("base_price") as string),
-      moq: parseInt(formData.get("moq") as string, 10),
-      image_url: (formData.get("image_url") as string) || null,
-      gallery_images: (() => { try { return JSON.parse((formData.get("gallery_images") as string) || "[]"); } catch { return []; } })(),
-      sample_price: formData.get("sample_price") ? parseFloat(formData.get("sample_price") as string) : null,
-      specifications: (() => { try { const s = formData.get("specifications") as string; return s ? JSON.parse(s) : null; } catch { return null; } })(),
-      is_flash_deal: formData.get("is_flash_deal") === "true",
-      flash_discount_pct: formData.get("flash_discount_pct")
-        ? parseFloat(formData.get("flash_discount_pct") as string)
-        : null,
-      flash_starts_at: (formData.get("flash_starts_at") as string) || null,
-      flash_ends_at: (formData.get("flash_ends_at") as string) || null,
-    })
+    .update(updateData)
     .eq("id", productId);
 
   if (error) return { error: error.message };
   revalidatePath("/admin/inventory");
   revalidatePath("/", "layout");
   revalidatePath("/[locale]/products", "page");
-  return { success: true };
+  return { success: true, isApproved: isSupervisorOrAdmin };
 }
 
 // ── Categories ────────────────────────────────────────────────

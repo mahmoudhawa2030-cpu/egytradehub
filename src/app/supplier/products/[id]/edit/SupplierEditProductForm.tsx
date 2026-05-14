@@ -30,6 +30,7 @@ export default function SupplierEditProductForm({ product, categories }: { produ
   const [isPending, startTransition] = useTransition();
   const [isFlash, setIsFlash] = useState(product.is_flash_deal);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,10 +38,11 @@ export default function SupplierEditProductForm({ product, categories }: { produ
     formData.set("is_flash_deal", isFlash ? "true" : "false");
     startTransition(async () => {
       const result = await updateProduct(product.id, formData);
-      if (result && "error" in result) {
+      if (result && "error" in result && result.error) {
         setError(result.error);
       } else {
-        router.push("/supplier/dashboard");
+        setSuccess(true);
+        setTimeout(() => router.push("/supplier/dashboard"), 2500);
       }
     });
   }
@@ -59,6 +61,12 @@ export default function SupplierEditProductForm({ product, categories }: { produ
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+      )}
+
+      {success && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+          ✅ Product updated successfully. It is now <strong>pending admin approval</strong> before being visible to buyers. Redirecting...
+        </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
