@@ -26,9 +26,9 @@ function ProductCard({ product, flashBadge }: { product: DbProduct; flashBadge?:
 
   return (
     <Link href={`/${locale}/products/${product.slug ?? product.id}`} className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="h-48 bg-neutral-100 flex items-center justify-center relative overflow-hidden">
+      <div className="h-48 bg-white flex items-center justify-center relative overflow-hidden">
         {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+          <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-3" />
         ) : (
           <Package className="w-16 h-16 text-neutral-400" strokeWidth={1.5} />
         )}

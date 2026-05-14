@@ -36,7 +36,7 @@ export default function FlashDealsScroll({ deals, locale }: { deals: DbDeal[]; l
                 </span>
               )}
               {d.image_url ? (
-                <img src={d.image_url} alt={d.name} className="w-full h-full object-cover" />
+                <img src={d.image_url} alt={d.name} className="w-full h-full object-contain p-2" />
               ) : (
                 <Package className="w-10 h-10 text-neutral-500/60" strokeWidth={1.5} />
               )}

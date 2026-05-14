@@ -179,9 +179,9 @@ export default async function ProductsPage({
                   href={`/${locale}/products/${product.slug ?? product.id}`}
                   className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow flex flex-col"
                 >
-                  <div className="h-44 bg-neutral-100 flex items-center justify-center relative">
+                  <div className="h-44 bg-white flex items-center justify-center relative">
                     {product.image_url ? (
-                      <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                      <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-3" />
                     ) : (
                       <span className="text-xs text-neutral-400">No image</span>
                     )}

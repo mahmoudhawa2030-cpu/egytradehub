@@ -43,7 +43,7 @@ export default function TrendingProducts({ products, locale }: { products: DbPro
                   <Heart className="w-3 h-3 text-[#FF6A00]" strokeWidth={2} />
                 </span>
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                  <img src={p.image_url} alt={p.name} className="w-full h-full object-contain p-2" />
                 ) : (
                   <Package className="w-10 h-10 text-neutral-500/60" strokeWidth={1.5} />
                 )}
