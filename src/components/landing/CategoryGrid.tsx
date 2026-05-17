@@ -60,7 +60,7 @@ export default function CategoryGrid({ categories }: { categories: DbCategory[] 
           return (
             <Link
               key={c.id}
-              href={`/en/products?category=${encodeURIComponent(c.name)}`}
+              href={`/en/categories/${c.slug}`}
               className="flex flex-col items-center gap-1 cursor-pointer group"
             >
               <div className={`${bg} w-12 h-12 rounded-xl flex items-center justify-center transition group-active:scale-95 overflow-hidden relative`}>
