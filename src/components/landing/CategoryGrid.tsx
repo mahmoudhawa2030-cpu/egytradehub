@@ -49,7 +49,7 @@ export default function CategoryGrid({ categories }: { categories: DbCategory[] 
     <section className="mx-2.5 mt-2.5">
       <div className="flex items-center justify-between mb-2.5">
         <h2 className="text-sm font-semibold text-neutral-900">Browse categories</h2>
-        <Link href="/categories" className="text-xs text-[#FF6A00] font-medium">See all ›</Link>
+        <Link href="/en/products" className="text-xs text-[#FF6A00] font-medium">See all ›</Link>
       </div>
       <div className="grid grid-cols-5 gap-1.5">
         {topLevel.map((c, i) => {
@@ -60,7 +60,7 @@ export default function CategoryGrid({ categories }: { categories: DbCategory[] 
           return (
             <Link
               key={c.id}
-              href={`/categories/${c.slug}`}
+              href={`/en/products?category=${encodeURIComponent(c.name)}`}
               className="flex flex-col items-center gap-1 cursor-pointer group"
             >
               <div className={`${bg} w-12 h-12 rounded-xl flex items-center justify-center transition group-active:scale-95 overflow-hidden relative`}>
