@@ -124,9 +124,9 @@ export default function MobileTopBar() {
         {categoryTabs.map((tab) => {
           const on = tab === active;
           return (
-            <button
+            <Link
               key={tab}
-              onClick={() => setActive(tab)}
+              href={`/en/products?category=${encodeURIComponent(tab)}`}
               className={[
                 "px-3.5 py-1.5 rounded-full text-[11.5px] whitespace-nowrap font-medium transition flex-shrink-0 mx-0.5",
                 on
@@ -135,7 +135,7 @@ export default function MobileTopBar() {
               ].join(" ")}
             >
               {tab}
-            </button>
+            </Link>
           );
         })}
       </div>
