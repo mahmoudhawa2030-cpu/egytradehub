@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Check, CheckCheck, ArrowLeft } from "lucide-react";
+import { Send, Check, CheckCheck, ArrowLeft, Clock, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useChatNotifications } from "./useChatNotifications";
 
@@ -20,6 +20,10 @@ type Message = {
   content: string;
   created_at: string;
   is_read: boolean;
+  /** Local-only flag for optimistic messages still being sent */
+  pending?: boolean;
+  /** Local-only flag if send failed */
+  failed?: boolean;
 };
 
 function displayName(p: ChatPeer) {
@@ -90,7 +94,20 @@ export default function ChatRoom({ myId, peer, onBack, showHeader = true, classN
         { event: "INSERT", schema: "public", table: "messages", filter: `room_id=eq.${room}` },
         (payload) => {
           const msg = payload.new as Message;
-          setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+          setMessages((prev) => {
+            // Already present (e.g. inserted by our own send response)
+            if (prev.some((m) => m.id === msg.id)) return prev;
+            // Replace matching optimistic temp message (same sender + same content)
+            const tempIdx = prev.findIndex(
+              (m) => m.pending && m.sender_id === msg.sender_id && m.content === msg.content
+            );
+            if (tempIdx >= 0) {
+              const next = prev.slice();
+              next[tempIdx] = msg;
+              return next;
+            }
+            return [...prev, msg];
+          });
           if (msg.sender_id !== myId) {
             notify(displayName(peer), msg.content);
             // mark as read because user is viewing the chat
@@ -123,14 +140,47 @@ export default function ChatRoom({ myId, peer, onBack, showHeader = true, classN
   async function send() {
     const text = input.trim();
     if (!text || sending) return;
-    setSending(true);
-    const { error } = await supabase.from("messages").insert({
+
+    // Optimistic message - appears instantly
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const optimistic: Message = {
+      id: tempId,
       sender_id: myId,
       receiver_id: peer.user_id,
       room_id: room,
       content: text,
-    });
-    if (!error) setInput("");
+      created_at: new Date().toISOString(),
+      is_read: false,
+      pending: true,
+    };
+    setMessages((prev) => [...prev, optimistic]);
+    setInput("");
+    setSending(true);
+
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        sender_id: myId,
+        receiver_id: peer.user_id,
+        room_id: room,
+        content: text,
+      })
+      .select("id, sender_id, receiver_id, room_id, content, created_at, is_read")
+      .single();
+
+    if (error || !data) {
+      // Mark optimistic as failed
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m))
+      );
+    } else {
+      // Replace optimistic with real row (or remove temp if realtime already added it)
+      setMessages((prev) => {
+        const realExists = prev.some((m) => m.id === (data as Message).id);
+        if (realExists) return prev.filter((m) => m.id !== tempId);
+        return prev.map((m) => (m.id === tempId ? (data as Message) : m));
+      });
+    }
     setSending(false);
   }
 
@@ -208,7 +258,11 @@ export default function ChatRoom({ myId, peer, onBack, showHeader = true, classN
                     <div className="absolute right-2 bottom-1 flex items-center gap-0.5 text-[10px] text-neutral-500">
                       <span>{formatTime(msg.created_at)}</span>
                       {isMine &&
-                        (msg.is_read ? (
+                        (msg.failed ? (
+                          <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                        ) : msg.pending ? (
+                          <Clock className="w-3 h-3 text-neutral-400" />
+                        ) : msg.is_read ? (
                           <CheckCheck className="w-3.5 h-3.5 text-blue-500" />
                         ) : (
                           <Check className="w-3.5 h-3.5" />
