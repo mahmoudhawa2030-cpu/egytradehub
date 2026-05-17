@@ -4,11 +4,11 @@ import Link from "next/link";
 import { ArrowLeft, Package } from "lucide-react";
 
 interface Props {
-  params: { slug: string; locale: string };
+  params: Promise<{ slug: string; locale: string }>;
 }
 
 export default async function CategoryPage({ params }: Props) {
-  const { slug, locale } = params;
+  const { slug, locale } = await params;
   const supabase = await createClient();
 
   // Get parent category
