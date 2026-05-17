@@ -10,13 +10,15 @@ VALUES ('chat-attachments', 'chat-attachments', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Allow authenticated users to upload to chat-attachments
-CREATE POLICY IF NOT EXISTS "Authenticated users can upload chat attachments"
+DROP POLICY IF EXISTS "Authenticated users can upload chat attachments" ON storage.objects;
+CREATE POLICY "Authenticated users can upload chat attachments"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (bucket_id = 'chat-attachments');
 
 -- Allow public read of chat attachments
-CREATE POLICY IF NOT EXISTS "Public read chat attachments"
+DROP POLICY IF EXISTS "Public read chat attachments" ON storage.objects;
+CREATE POLICY "Public read chat attachments"
 ON storage.objects FOR SELECT
 TO public
 USING (bucket_id = 'chat-attachments');
