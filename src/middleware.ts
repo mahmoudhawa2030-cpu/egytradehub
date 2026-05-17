@@ -100,7 +100,7 @@ export async function middleware(request: NextRequest) {
 
   const locale = (LOCALES.find((l) => pathname.startsWith(`/${l}`)) ?? "en") as Locale;
 
-  const publicRoutes = ["/", "/login", "/signup", "/forgot-password", "/products", "/search", "/rfq", "/help", "/suppliers", "/deals"];
+  const publicRoutes = ["/", "/login", "/signup", "/forgot-password", "/products", "/categories", "/search", "/rfq", "/help", "/suppliers", "/deals"];
   if (publicRoutes.some((r) => pathnameWithoutLocale === r || pathnameWithoutLocale.startsWith(r + "?") || pathnameWithoutLocale.startsWith(r + "/"))) {
     return response;
   }
