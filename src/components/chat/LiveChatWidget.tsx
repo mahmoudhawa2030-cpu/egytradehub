@@ -1,87 +1,81 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import { MessageCircle, X } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import ChatRoom, { type ChatPeer } from "./ChatRoom";
+import { useChatNotifications } from "./useChatNotifications";
 
 export default function LiveChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [supportPeer, setSupportPeer] = useState<ChatPeer | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unread, setUnread] = useState(0);
+  const { notify } = useChatNotifications();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+    const supabase = createClient();
+    let mounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    (async () => {
+      const { data: { user: u } } = await supabase.auth.getUser();
+      if (!mounted) return;
+      setUser(u);
+      if (u) {
+        // Find an admin/supervisor to chat with
+        const { data: admins } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, company_name, role")
+          .in("role", ["admin", "supervisor"])
+          .limit(1);
+        if (admins && admins.length > 0) {
+          setSupportPeer({
+            user_id: admins[0].user_id,
+            full_name: admins[0].full_name,
+            company_name: admins[0].company_name ?? "Support Team",
+            role: admins[0].role,
+          });
+        }
+
+        // Count unread messages
+        const { count } = await supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("receiver_id", u.id)
+          .eq("is_read", false);
+        if (mounted) setUnread(count ?? 0);
+
+        // Subscribe to incoming messages for badge + sound
+        channel = supabase
+          .channel(`livechat-${u.id}`)
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${u.id}` },
+            (payload) => {
+              const m = payload.new as { content: string };
+              setUnread((n) => n + 1);
+              if (!isOpen) notify("New message", m.content);
+            }
+          )
+          .subscribe();
+      }
       setLoading(false);
+    })();
+
+    return () => {
+      mounted = false;
+      if (channel) supabase.removeChannel(channel);
     };
-    checkUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() || !user) return;
-
-    setIsSending(true);
-    setError(null);
-    const supabase = createClient();
-
-    try {
-      // Find an admin/supervisor to send message to
-      const { data: admins, error: adminError } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .in("role", ["admin", "supervisor"])
-        .limit(1);
-
-      if (adminError) {
-        console.error("Error finding admin:", adminError);
-        setError("Could not find support team. Please try again.");
-        setIsSending(false);
-        return;
-      }
-
-      if (!admins || admins.length === 0) {
-        setError("No support team available right now.");
-        setIsSending(false);
-        return;
-      }
-
-      const adminId = admins[0].user_id;
-
-      // Generate room_id matching supervisor chat format: support:<sortedIds>
-      const roomId = `support:${[user.id, adminId].sort().join(":")}`;
-
-      // Send message using existing messages table schema
-      const { error: msgError } = await supabase.from("messages").insert({
-        sender_id: user.id,
-        receiver_id: adminId,
-        room_id: roomId,
-        content: message.trim(),
-      });
-
-      if (msgError) {
-        console.error("Error sending message:", msgError);
-        setError(`Failed to send: ${msgError.message}`);
-        setIsSending(false);
-        return;
-      }
-
-      setSent(true);
-      setMessage("");
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      setError("Something went wrong. Please try again.");
-    }
-
-    setIsSending(false);
-  };
+  // Reset unread when opened
+  useEffect(() => {
+    if (isOpen) setUnread(0);
+  }, [isOpen]);
 
   if (loading) return null;
 
@@ -90,25 +84,29 @@ export default function LiveChatWidget() {
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-gradient-to-r from-[#FF6A00] to-[#FF8C00] text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-gradient-to-r from-[#FF6A00] to-[#FF8C00] text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+        aria-label="Open live chat"
       >
         <div className="relative">
           <MessageCircle className="w-5 h-5" />
-          {/* Live indicator dot */}
           <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+          {unread > 0 && (
+            <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
         </div>
         <span className="font-medium text-sm">Live Chat</span>
       </button>
 
       {/* Chat Popup */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <div className="fixed bottom-24 right-6 z-50 w-[92vw] sm:w-96 h-[70vh] max-h-[600px] bg-white rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 fade-in duration-300">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#FF6A00] to-[#FF8C00] px-4 py-3 flex items-center justify-between">
+          <div className="bg-[#075e54] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
-              <div className="relative">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 text-white" />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-[#FF6A00]" />
               </div>
               <div>
                 <h3 className="font-semibold text-white text-sm">Live Support</h3>
@@ -121,96 +119,38 @@ export default function LiveChatWidget() {
             <button
               onClick={() => setIsOpen(false)}
               className="text-white/80 hover:text-white transition p-1"
+              aria-label="Close chat"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Body */}
-          <div className="p-4 bg-neutral-50 min-h-[200px] max-h-[300px] overflow-y-auto">
-            {!user ? (
-              /* Not logged in */
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="w-8 h-8 text-[#FF6A00]" />
-                </div>
-                <h4 className="font-semibold text-neutral-800 mb-2">Start a Conversation</h4>
-                <p className="text-neutral-600 text-sm mb-4">
-                  Sign in to chat with our support team
-                </p>
-                <Link
-                  href="/en/login?redirect=/en/messages"
-                  className="inline-block bg-gradient-to-r from-[#FF6A00] to-[#FF8C00] text-white px-6 py-2 rounded-lg font-medium hover:shadow-md transition"
-                >
-                  Sign In to Chat
-                </Link>
+          {!user ? (
+            <div className="flex-1 flex flex-col items-center justify-center bg-neutral-50 p-6 text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                <MessageCircle className="w-8 h-8 text-[#FF6A00]" />
               </div>
-            ) : sent ? (
-              /* Message sent */
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Send className="w-8 h-8 text-green-600" />
-                </div>
-                <h4 className="font-semibold text-neutral-800 mb-2">Message Sent!</h4>
-                <p className="text-neutral-600 text-sm mb-4">
-                  Our team will reply shortly. Check your messages.
-                </p>
-                <Link
-                  href="/en/messages"
-                  className="inline-block text-[#FF6A00] font-medium hover:underline"
-                >
-                  Go to Messages →
-                </Link>
-              </div>
-            ) : (
-              /* Chat form */
-              <div className="space-y-3">
-                <div className="bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
-                  <p className="text-sm text-neutral-600">
-                    👋 Hi there! How can we help you today?
-                  </p>
-                </div>
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm">
-                    {error}
-                  </div>
-                )}
-                <form onSubmit={handleSend} className="space-y-3">
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6A00]/20 focus:border-[#FF6A00] resize-none h-24 text-sm"
-                    disabled={isSending}
-                  />
-                  <button
-                    type="submit"
-                    disabled={!message.trim() || isSending}
-                    className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF8C00] text-white py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 hover:shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSending ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        Send Message
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="px-4 py-2 bg-neutral-100 border-t border-neutral-200 text-center">
-            <p className="text-xs text-neutral-500">
-              Messages are answered by our admin team
-            </p>
-          </div>
+              <h4 className="font-semibold text-neutral-800 mb-2">Start a Conversation</h4>
+              <p className="text-neutral-600 text-sm mb-4">
+                Sign in to chat with our support team
+              </p>
+              <Link
+                href="/en/login?redirect=/en/messages"
+                className="inline-block bg-gradient-to-r from-[#FF6A00] to-[#FF8C00] text-white px-6 py-2 rounded-lg font-medium hover:shadow-md transition"
+              >
+                Sign In to Chat
+              </Link>
+            </div>
+          ) : !supportPeer ? (
+            <div className="flex-1 flex items-center justify-center text-neutral-500 text-sm p-6 text-center">
+              No support team available right now. Please try again later.
+            </div>
+          ) : (
+            <div className="flex-1 overflow-hidden">
+              <ChatRoom myId={user.id} peer={supportPeer} showHeader={false} />
+            </div>
+          )}
         </div>
       )}
     </>
