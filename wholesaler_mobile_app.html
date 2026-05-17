@@ -1,0 +1,590 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#f0f0f0;font-family:var(--font-sans)}
+
+.phone{width:375px;margin:0 auto;background:#f4f4f4;border-radius:36px;border:8px solid #1a1a1a;overflow:hidden;position:relative;box-shadow:0 0 0 1px #333}
+.notch{background:#1a1a1a;height:28px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+.notch-pill{width:90px;height:18px;background:#000;border-radius:12px}
+.status-bar{background:#D32F2F;display:flex;justify-content:space-between;align-items:center;padding:4px 18px}
+.status-time{font-size:12px;font-weight:500;color:#fff}
+.status-icons{display:flex;gap:5px;align-items:center}
+.status-icons svg{width:12px;height:12px;fill:none;stroke:#fff;stroke-width:2}
+
+.screen{background:#f4f4f4;overflow:hidden}
+
+.topbar{background:#C62828;padding:10px 14px 0}
+.top-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.brand{display:flex;align-items:center;gap:6px}
+.brand-logo{width:28px;height:28px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.brand-logo svg{width:16px;height:16px}
+.brand-name{font-size:16px;font-weight:500;color:#fff;letter-spacing:-0.3px}
+.brand-name span{color:#FFCC02}
+.top-actions{display:flex;gap:10px;align-items:center}
+.top-actions svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:1.6}
+.notif-dot{width:7px;height:7px;background:#FFCC02;border-radius:50%;margin-top:-14px;margin-left:-8px;border:1px solid #C62828}
+
+.search-row{display:flex;gap:6px;padding-bottom:10px}
+.search-box{flex:1;background:#fff;border-radius:8px;display:flex;align-items:center;gap:6px;padding:8px 10px}
+.search-box svg{width:14px;height:14px;fill:none;stroke:#999;stroke-width:1.8;flex-shrink:0}
+.search-box input{border:none;outline:none;font-size:13px;color:#333;flex:1;background:transparent}
+.search-box input::placeholder{color:#bbb}
+.cam-btn{background:#B71C1C;border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:center}
+.cam-btn svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.6}
+
+.cat-scroll{background:#C62828;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;padding:0 14px 10px}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-tab{padding:5px 14px;border-radius:20px;font-size:12px;color:rgba(255,255,255,0.75);white-space:nowrap;cursor:pointer;flex-shrink:0}
+.cat-tab.on{background:#fff;color:#C62828;font-weight:500}
+
+.body{overflow-y:auto;max-height:600px;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+
+.hero-section{margin:8px;background:#fff;border-radius:12px;overflow:hidden}
+.hero-inner{background:#C62828;padding:14px}
+.hero-kicker{font-size:10px;color:#FFCC02;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px}
+.hero-title{font-size:17px;font-weight:500;color:#fff;line-height:1.3;margin-bottom:6px}
+.hero-sub{font-size:12px;color:rgba(255,255,255,0.8);margin-bottom:12px}
+.hero-btns{display:flex;gap:8px}
+.hbtn-primary{background:#FFCC02;color:#7B1A1A;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;flex-shrink:0}
+.hbtn-outline{background:transparent;color:#fff;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,0.4);flex-shrink:0}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:0.5px solid #eee}
+.hstat{padding:10px 0;text-align:center;border-right:0.5px solid #eee}
+.hstat:last-child{border-right:none}
+.hstat-num{font-size:15px;font-weight:500;color:#C62828}
+.hstat-label{font-size:10px;color:#999;margin-top:1px}
+
+.section-wrap{margin:0 8px 8px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sec-title{font-size:14px;font-weight:500;color:#1a1a1a}
+.sec-link{font-size:12px;color:#C62828}
+
+.flash-bar{background:#1a1a1a;border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin:8px;margin-bottom:6px}
+.flash-left{display:flex;align-items:center;gap:8px}
+.flash-icon{width:28px;height:28px;background:#C62828;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.flash-icon svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:1.8}
+.flash-label{font-size:13px;font-weight:500;color:#fff}
+.flash-sub{font-size:11px;color:#888;margin-top:1px}
+.timer-row{display:flex;gap:4px;align-items:center}
+.tdig{background:#C62828;color:#fff;font-size:13px;font-weight:500;padding:4px 7px;border-radius:5px;min-width:26px;text-align:center}
+.tsep{color:#666;font-size:12px}
+
+.horiz-scroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 0 4px}
+.horiz-scroll::-webkit-scrollbar{display:none}
+
+.cat-card{flex-shrink:0;width:72px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.cat-icon-box{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.cat-icon-box svg{width:22px;height:22px;fill:none;stroke-width:1.6}
+.cat-label{font-size:11px;color:#444;text-align:center;line-height:1.2}
+
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pcard{background:#fff;border-radius:12px;overflow:hidden;cursor:pointer;border:0.5px solid #eee}
+.pcard-img{height:100px;display:flex;align-items:center;justify-content:center;position:relative}
+.pcard-badges{position:absolute;top:6px;left:6px;display:flex;flex-direction:column;gap:3px}
+.pbadge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500;display:inline-block}
+.pbadge-hot{background:#FFEBEE;color:#B71C1C}
+.pbadge-new{background:#E8F5E9;color:#1B5E20}
+.pbadge-deal{background:#FFF3E0;color:#E65100}
+.pfav{position:absolute;top:6px;right:6px;width:24px;height:24px;background:rgba(255,255,255,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.pfav svg{width:12px;height:12px;fill:none;stroke:#C62828;stroke-width:1.8}
+.pcard-body{padding:8px}
+.pcard-name{font-size:12px;color:#1a1a1a;line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pcard-price{font-size:14px;font-weight:500;color:#C62828}
+.pcard-range{font-size:11px;color:#999}
+.pcard-moq{font-size:11px;color:#888;margin-top:2px}
+.pcard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:0.5px solid #f0f0f0}
+.pcard-sup{font-size:10px;color:#888;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard-vbadge{font-size:10px;background:#E8F5E9;color:#1B5E20;padding:1px 5px;border-radius:3px;flex-shrink:0}
+
+.prog-bar{height:3px;background:#eee;border-radius:2px;margin-top:3px}
+.prog-fill{height:100%;background:#C62828;border-radius:2px}
+
+.supplier-scroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 0 4px}
+.supplier-scroll::-webkit-scrollbar{display:none}
+.sup-card{flex-shrink:0;width:140px;background:#fff;border-radius:12px;padding:10px;border:0.5px solid #eee;cursor:pointer}
+.sup-avatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;margin-bottom:8px}
+.sup-name{font-size:12px;font-weight:500;color:#1a1a1a;margin-bottom:2px}
+.sup-meta{font-size:11px;color:#999}
+.sup-rating{font-size:11px;color:#E65100;margin-top:3px}
+.sup-tags{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap}
+.sup-tag{font-size:10px;background:#F5F5F5;color:#555;padding:2px 5px;border-radius:4px}
+
+.rfq-card{background:#fff;border-radius:12px;padding:14px;border:0.5px solid #eee}
+.rfq-title{font-size:14px;font-weight:500;color:#1a1a1a;margin-bottom:4px}
+.rfq-sub{font-size:12px;color:#888;margin-bottom:12px}
+.field-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field-label{font-size:11px;color:#888}
+.field-input{background:#f7f7f7;border:0.5px solid #e0e0e0;border-radius:8px;padding:9px 10px;font-size:13px;color:#1a1a1a;outline:none;width:100%}
+.field-input::placeholder{color:#bbb}
+.rfq-btn{width:100%;background:#C62828;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px}
+
+.promo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.promo-a{background:#C62828;border-radius:12px;padding:12px;cursor:pointer}
+.promo-b{background:#1a1a1a;border-radius:12px;padding:12px;cursor:pointer}
+.promo-kicker{font-size:10px;font-weight:500;margin-bottom:4px;letter-spacing:0.04em}
+.promo-title{font-size:13px;font-weight:500;line-height:1.3;margin-bottom:6px}
+.promo-cta{font-size:11px;font-weight:500}
+
+.orders-card{background:#fff;border-radius:12px;padding:12px;border:0.5px solid #eee}
+.order-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid #f5f5f5}
+.order-row:last-child{border-bottom:none;padding-bottom:0}
+.order-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.order-icon svg{width:16px;height:16px;fill:none;stroke-width:1.6}
+.order-info{flex:1}
+.order-id{font-size:12px;font-weight:500;color:#1a1a1a}
+.order-desc{font-size:11px;color:#888;margin-top:1px}
+.order-right{text-align:right}
+.order-amount{font-size:13px;font-weight:500;color:#1a1a1a}
+.order-status{font-size:10px;padding:2px 7px;border-radius:4px;margin-top:2px;display:inline-block}
+
+.bnav{background:#fff;border-top:0.5px solid #eee;display:flex;padding:8px 0 12px}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.bnav-item svg{width:20px;height:20px;fill:none;stroke:#bbb;stroke-width:1.6}
+.bnav-item.on svg{stroke:#C62828}
+.bnav-item span{font-size:10px;color:#bbb}
+.bnav-item.on span{color:#C62828}
+.bnav-dot-wrap{position:relative;width:20px}
+.bnav-dot{position:absolute;top:-2px;right:-4px;width:8px;height:8px;background:#FFCC02;border-radius:50%;border:1.5px solid #fff}
+
+.divider{height:6px;background:#f4f4f4}
+</style>
+
+<h2 class="sr-only">Beautiful wholesaler mobile app interface with Alibaba-style design, featuring flash deals, product grid, category browsing, supplier directory, and RFQ form.</h2>
+
+<div style="padding:16px 0;background:var(--color-background-secondary)">
+<div class="phone">
+  <div class="notch"><div class="notch-pill"></div></div>
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24"><path d="M1 6s4.5-4 11-4 11 4 11 4"/><path d="M5 10s2.5-2.5 7-2.5S19 10 19 10"/><path d="M8.5 14s1.5-1.5 3.5-1.5 3.5 1.5 3.5 1.5"/><circle cx="12" cy="18" r="1" fill="#fff"/></svg>
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <div class="top-row1">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" fill="#C62828"/><path d="M9 22V12h6v10" stroke="#fff" stroke-width="1.5"/></svg>
+        </div>
+        <div class="brand-name">Trade<span>Hub</span></div>
+      </div>
+      <div class="top-actions">
+        <div style="position:relative">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <div class="notif-dot"></div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
+    <div class="search-row">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search 50,000+ wholesale products" readonly>
+      </div>
+      <div class="cam-btn">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </div>
+    </div>
+    <div class="cat-scroll">
+      <div class="cat-tab on">All</div>
+      <div class="cat-tab">Electronics</div>
+      <div class="cat-tab">Machinery</div>
+      <div class="cat-tab">Textiles</div>
+      <div class="cat-tab">Chemicals</div>
+      <div class="cat-tab">Safety</div>
+    </div>
+  </div>
+
+  <div class="body" id="appBody">
+
+    <div class="hero-section">
+      <div class="hero-inner">
+        <div class="hero-kicker">Verified wholesale platform</div>
+        <div class="hero-title">Bulk orders made simple</div>
+        <div class="hero-sub">Connect with 3,000+ certified suppliers. MOQ from 10 units.</div>
+        <div class="hero-btns">
+          <button class="hbtn-primary">Browse deals</button>
+          <button class="hbtn-outline">Post RFQ</button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-num">50K+</div><div class="hstat-label">Products</div></div>
+        <div class="hstat"><div class="hstat-num">3,200</div><div class="hstat-label">Suppliers</div></div>
+        <div class="hstat"><div class="hstat-num">99%</div><div class="hstat-label">On-time</div></div>
+      </div>
+    </div>
+
+    <div class="flash-bar">
+      <div class="flash-left">
+        <div class="flash-icon">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#fff"/></svg>
+        </div>
+        <div>
+          <div class="flash-label">Flash deals</div>
+          <div class="flash-sub">Limited stock at bulk rates</div>
+        </div>
+      </div>
+      <div class="timer-row">
+        <div class="tdig" id="fh">05</div>
+        <span class="tsep">:</span>
+        <div class="tdig" id="fm">44</div>
+        <span class="tsep">:</span>
+        <div class="tdig" id="fs">09</div>
+      </div>
+    </div>
+
+    <div class="horiz-scroll" style="padding:0 8px;margin-bottom:8px">
+      <div class="pcard" style="flex-shrink:0;width:150px;background:#fff;border-radius:12px;overflow:hidden;border:0.5px solid #eee">
+        <div class="pcard-img" style="background:#FFF3E0;height:88px">
+          <div class="pcard-badges"><span class="pbadge pbadge-deal">-38%</span></div>
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="12" width="36" height="22" rx="4" fill="#EF9F27" opacity="0.4"/><rect x="12" y="6" width="24" height="16" rx="3" fill="#854F0B" opacity="0.55"/><circle cx="16" cy="36" r="3.5" fill="#854F0B" opacity="0.45"/><circle cx="32" cy="36" r="3.5" fill="#854F0B" opacity="0.45"/></svg>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-name">Hydraulic pump set industrial</div>
+          <div class="pcard-price">$44 <span class="pcard-range">– $68</span></div>
+          <div class="pcard-moq">MOQ 5 units</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:81%"></div></div>
+          <div style="font-size:10px;color:#C62828;margin-top:3px">81% claimed</div>
+        </div>
+      </div>
+      <div class="pcard" style="flex-shrink:0;width:150px;background:#fff;border-radius:12px;overflow:hidden;border:0.5px solid #eee">
+        <div class="pcard-img" style="background:#E8F5E9;height:88px">
+          <div class="pcard-badges"><span class="pbadge pbadge-deal">-29%</span></div>
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="32" rx="16" fill="#97C459" opacity="0.3"/><rect x="16" y="16" width="16" height="16" rx="8" fill="#3B6D11" opacity="0.5"/><rect x="20" y="20" width="8" height="8" rx="4" fill="#27500A" opacity="0.7"/></svg>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-name">Servo motor 400W AC</div>
+          <div class="pcard-price">$56 <span class="pcard-range">– $80</span></div>
+          <div class="pcard-moq">MOQ 10 units</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:63%"></div></div>
+          <div style="font-size:10px;color:#C62828;margin-top:3px">63% claimed</div>
+        </div>
+      </div>
+      <div class="pcard" style="flex-shrink:0;width:150px;background:#fff;border-radius:12px;overflow:hidden;border:0.5px solid #eee">
+        <div class="pcard-img" style="background:#E3F2FD;height:88px">
+          <div class="pcard-badges"><span class="pbadge pbadge-deal">-41%</span></div>
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="14" width="36" height="24" rx="4" fill="#378ADD" opacity="0.35"/><rect x="13" y="8" width="22" height="16" rx="3" fill="#185FA5" opacity="0.55"/></svg>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-name">HEPA air purifier H13</div>
+          <div class="pcard-price">$7 <span class="pcard-range">– $11</span></div>
+          <div class="pcard-moq">MOQ 20 units</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:92%"></div></div>
+          <div style="font-size:10px;color:#C62828;margin-top:3px">92% claimed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-wrap" style="margin-top:8px">
+      <div class="sec-head"><div class="sec-title">Shop by category</div><span class="sec-link">All &rsaquo;</span></div>
+      <div class="horiz-scroll">
+        <div class="cat-card">
+          <div class="cat-icon-box" style="background:#FFF3E0">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#E65100"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2"/></svg>
+          </div>
+          <span class="cat-label">Machinery</span>
+        </div>
+        <div class="cat-card">
+          <div class="cat-icon-box" style="background:#E8F5E9">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#2E7D32"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <span class="cat-label">Electronics</span>
+        </div>
+        <div class="cat-card">
+          <div class="cat-icon-box" style="background:#E3F2FD">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#1565C0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span class="cat-label">Safety</span>
+        </div>
+        <div class="cat-card">
+          <div class="cat-icon-box" style="background:#F3E5F5">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#6A1B9A"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <span class="cat-label">Raw materials</span>
+        </div>
+        <div class="cat-card">
+          <div class="cat-icon-box" style="background:#E0F7FA">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#00695C"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <span class="cat-label">Logistics</span>
+        </div>
+        <div class="cat-card">
+          <div class="cat-icon-box" style="background:#FFF8E1">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#F57F17"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          </div>
+          <span class="cat-label">Chemicals</span>
+        </div>
+        <div class="cat-card">
+          <div class="cat-icon-box" style="background:#FCE4EC">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#880E4F"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <span class="cat-label">Healthcare</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-wrap" style="margin-top:8px">
+      <div class="sec-head"><div class="sec-title">Trending now</div><span class="sec-link">See all &rsaquo;</span></div>
+      <div class="prod-grid">
+
+        <div class="pcard">
+          <div class="pcard-img" style="background:#FFF3E0">
+            <div class="pcard-badges"><span class="pbadge pbadge-hot">Hot</span></div>
+            <div class="pfav"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <svg width="50" height="50" viewBox="0 0 50 50" fill="none"><rect x="7" y="14" width="36" height="22" rx="4" fill="#EF9F27" opacity="0.4"/><rect x="13" y="8" width="24" height="16" rx="3" fill="#854F0B" opacity="0.55"/><circle cx="17" cy="37" r="3.5" fill="#854F0B" opacity="0.4"/><circle cx="33" cy="37" r="3.5" fill="#854F0B" opacity="0.4"/></svg>
+          </div>
+          <div class="pcard-body">
+            <div class="pcard-name">Industrial conveyor belt 6m</div>
+            <div class="pcard-price">$220</div>
+            <div class="pcard-range">$220 – $310 / unit</div>
+            <div class="pcard-moq">MOQ 2 units</div>
+            <div class="pcard-foot"><span class="pcard-sup">MetaTech Corp</span><span class="pcard-vbadge">Verified</span></div>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pcard-img" style="background:#E8F5E9">
+            <div class="pcard-badges"><span class="pbadge pbadge-new">New</span></div>
+            <div class="pfav"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <svg width="50" height="50" viewBox="0 0 50 50" fill="none"><circle cx="25" cy="25" r="16" fill="#97C459" opacity="0.3"/><circle cx="25" cy="25" r="10" fill="#3B6D11" opacity="0.45"/><circle cx="25" cy="25" r="5" fill="#27500A" opacity="0.65"/></svg>
+          </div>
+          <div class="pcard-body">
+            <div class="pcard-name">Safety goggle EN 166 pack</div>
+            <div class="pcard-price">$3.20</div>
+            <div class="pcard-range">$3.20 – $5.50 / unit</div>
+            <div class="pcard-moq">MOQ 50 units</div>
+            <div class="pcard-foot"><span class="pcard-sup">GreenRoute Ltd</span><span class="pcard-vbadge">Verified</span></div>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pcard-img" style="background:#E3F2FD">
+            <div class="pcard-badges"><span class="pbadge pbadge-deal">-25%</span></div>
+            <div class="pfav"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <svg width="50" height="50" viewBox="0 0 50 50" fill="none"><rect x="7" y="14" width="36" height="24" rx="4" fill="#378ADD" opacity="0.35"/><rect x="14" y="8" width="22" height="16" rx="3" fill="#185FA5" opacity="0.55"/></svg>
+          </div>
+          <div class="pcard-body">
+            <div class="pcard-name">Pneumatic valve kit 12pc</div>
+            <div class="pcard-price">$18.90</div>
+            <div class="pcard-range">$18.90 – $27 / unit</div>
+            <div class="pcard-moq">MOQ 10 units</div>
+            <div class="pcard-foot"><span class="pcard-sup">Prexon Systems</span><span class="pcard-vbadge">Verified</span></div>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pcard-img" style="background:#F3E5F5">
+            <div class="pfav"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <svg width="50" height="50" viewBox="0 0 50 50" fill="none"><rect x="8" y="8" width="34" height="34" rx="17" fill="#AFA9EC" opacity="0.3"/><rect x="16" y="16" width="18" height="18" rx="9" fill="#534AB7" opacity="0.5"/><rect x="21" y="21" width="8" height="8" rx="4" fill="#3C3489" opacity="0.7"/></svg>
+          </div>
+          <div class="pcard-body">
+            <div class="pcard-name">Digital pressure sensor 4–20mA</div>
+            <div class="pcard-price">$9.20</div>
+            <div class="pcard-range">$9.20 – $15 / unit</div>
+            <div class="pcard-moq">MOQ 25 units</div>
+            <div class="pcard-foot"><span class="pcard-sup">ZenKit</span><span class="pcard-vbadge">Verified</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider" style="margin-top:8px"></div>
+
+    <div class="section-wrap" style="margin-top:8px">
+      <div class="promo-grid">
+        <div class="promo-a">
+          <div class="promo-kicker" style="color:#FFCC02">Free freight</div>
+          <div class="promo-title" style="color:#fff">50+ unit orders ship free this week</div>
+          <div class="promo-cta" style="color:#FFCC02">Claim offer &rsaquo;</div>
+        </div>
+        <div class="promo-b">
+          <div class="promo-kicker" style="color:#FFCC02">Net-30 terms</div>
+          <div class="promo-title" style="color:#fff">Buy now, pay in 30 days — apply instantly</div>
+          <div class="promo-cta" style="color:#FFCC02">Apply now &rsaquo;</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider" style="margin-top:8px"></div>
+
+    <div class="section-wrap" style="margin-top:8px">
+      <div class="sec-head"><div class="sec-title">Top suppliers</div><span class="sec-link">Directory &rsaquo;</span></div>
+      <div class="supplier-scroll">
+        <div class="sup-card">
+          <div class="sup-avatar" style="background:#FFF3E0;color:#E65100">AC</div>
+          <div class="sup-name">Acme Industrial</div>
+          <div class="sup-meta">12 yrs &bull; 2,400 products</div>
+          <div class="sup-rating">&#9733; 4.9 (1.2k reviews)</div>
+          <div class="sup-tags"><span class="sup-tag">ISO 9001</span><span class="sup-tag">OEM</span></div>
+        </div>
+        <div class="sup-card">
+          <div class="sup-avatar" style="background:#E8F5E9;color:#2E7D32">PX</div>
+          <div class="sup-name">Prexon Systems</div>
+          <div class="sup-meta">8 yrs &bull; 1,800 products</div>
+          <div class="sup-rating">&#9733; 4.7 (940 reviews)</div>
+          <div class="sup-tags"><span class="sup-tag">CE</span><span class="sup-tag">RoHS</span></div>
+        </div>
+        <div class="sup-card">
+          <div class="sup-avatar" style="background:#E3F2FD;color:#1565C0">ZK</div>
+          <div class="sup-name">ZenKit Machinery</div>
+          <div class="sup-meta">5 yrs &bull; 900 products</div>
+          <div class="sup-rating">&#9733; 4.8 (610 reviews)</div>
+          <div class="sup-tags"><span class="sup-tag">ISO 14001</span></div>
+        </div>
+        <div class="sup-card">
+          <div class="sup-avatar" style="background:#F3E5F5;color:#6A1B9A">MT</div>
+          <div class="sup-name">MetaTech Corp</div>
+          <div class="sup-meta">15 yrs &bull; 3,100 products</div>
+          <div class="sup-rating">&#9733; 4.6 (2.1k reviews)</div>
+          <div class="sup-tags"><span class="sup-tag">OEM</span><span class="sup-tag">ODM</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider" style="margin-top:8px"></div>
+
+    <div class="section-wrap" style="margin-top:8px">
+      <div class="sec-head"><div class="sec-title">Request a quote (RFQ)</div></div>
+      <div class="rfq-card">
+        <div class="rfq-sub">Tell suppliers exactly what you need — get responses in 24h.</div>
+        <div class="field-group">
+          <div class="field">
+            <label class="field-label">Product</label>
+            <input class="field-input" type="text" placeholder="e.g. HEPA filters">
+          </div>
+          <div class="field">
+            <label class="field-label">Quantity</label>
+            <input class="field-input" type="number" placeholder="500">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field">
+            <label class="field-label">Target price ($)</label>
+            <input class="field-input" type="number" placeholder="7.50">
+          </div>
+          <div class="field">
+            <label class="field-label">Country</label>
+            <input class="field-input" type="text" placeholder="Egypt">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label class="field-label">Special requirements</label>
+          <textarea class="field-input" rows="2" placeholder="Certifications, packaging, lead time..." style="resize:none"></textarea>
+        </div>
+        <button class="rfq-btn" onclick="sendPrompt('How would the RFQ matching algorithm work to connect buyers with the best suppliers?')">Submit RFQ — get quotes in 24h &#8599;</button>
+      </div>
+    </div>
+
+    <div class="divider" style="margin-top:8px"></div>
+
+    <div class="section-wrap" style="margin-top:8px;margin-bottom:0">
+      <div class="sec-head"><div class="sec-title">Recent orders</div><span class="sec-link">View all &rsaquo;</span></div>
+      <div class="orders-card">
+        <div class="order-row">
+          <div class="order-icon" style="background:#E8F5E9">
+            <svg viewBox="0 0 24 24" style="stroke:#2E7D32"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="order-info">
+            <div class="order-id">#TH-2024-1102</div>
+            <div class="order-desc">HEPA 7740 &times; 200 units</div>
+          </div>
+          <div class="order-right">
+            <div class="order-amount">$1,700</div>
+            <div class="order-status" style="background:#E8F5E9;color:#1B5E20">Delivered</div>
+          </div>
+        </div>
+        <div class="order-row">
+          <div class="order-icon" style="background:#FFF3E0">
+            <svg viewBox="0 0 24 24" style="stroke:#E65100"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div class="order-info">
+            <div class="order-id">#TH-2024-1089</div>
+            <div class="order-desc">Safety harness &times; 50 units</div>
+          </div>
+          <div class="order-right">
+            <div class="order-amount">$1,125</div>
+            <div class="order-status" style="background:#FFF3E0;color:#E65100">In transit</div>
+          </div>
+        </div>
+        <div class="order-row">
+          <div class="order-icon" style="background:#E3F2FD">
+            <svg viewBox="0 0 24 24" style="stroke:#1565C0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="order-info">
+            <div class="order-id">#TH-2024-1076</div>
+            <div class="order-desc">Servo motor &times; 30 units</div>
+          </div>
+          <div class="order-right">
+            <div class="order-amount">$2,310</div>
+            <div class="order-status" style="background:#E3F2FD;color:#1565C0">Processing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+
+  </div>
+
+  <div class="bnav">
+    <div class="bnav-item on">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="bnav-item">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Search</span>
+    </div>
+    <div class="bnav-item">
+      <div class="bnav-dot-wrap">
+        <svg viewBox="0 0 24 24" style="display:block"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <div class="bnav-dot"></div>
+      </div>
+      <span>Orders</span>
+    </div>
+    <div class="bnav-item">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Messages</span>
+    </div>
+    <div class="bnav-item">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Account</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+let sec=5*3600+44*60+9;
+function tick(){
+  if(sec<=0)return;
+  sec--;
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+  const p=n=>String(n).padStart(2,'0');
+  const fh=document.getElementById('fh'),fm=document.getElementById('fm'),fs=document.getElementById('fs');
+  if(fh)fh.textContent=p(h);
+  if(fm)fm.textContent=p(m);
+  if(fs)fs.textContent=p(s);
+}
+setInterval(tick,1000);
+
+document.querySelectorAll('.cat-tab').forEach(t=>{
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.cat-tab').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+document.querySelectorAll('.bnav-item').forEach(b=>{
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.bnav-item').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+</script>

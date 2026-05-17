@@ -25,7 +25,7 @@ export async function createSupplierProduct(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  // Verify user is a supplier
+  // Verify user is a supplier or supervisor
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
@@ -34,7 +34,8 @@ export async function createSupplierProduct(formData: FormData) {
 
   console.log("[DEBUG] User role:", profile?.role, "Error:", profileError);
 
-  if (profile?.role !== "supplier") {
+  const isSupervisorOrAdmin = profile?.role === "supervisor" || profile?.role === "admin";
+  if (profile?.role !== "supplier" && !isSupervisorOrAdmin) {
     return { error: `Only suppliers can add products. Your role: ${profile?.role || 'unknown'}` };
   }
 
@@ -53,7 +54,7 @@ export async function createSupplierProduct(formData: FormData) {
     gallery_images: (() => { try { return JSON.parse((formData.get("gallery_images") as string) || "[]"); } catch { return []; } })(),
     sample_price: formData.get("sample_price") ? parseFloat(formData.get("sample_price") as string) : null,
     specifications: (() => { try { const s = formData.get("specifications") as string; return s ? JSON.parse(s) : null; } catch { return null; } })(),
-    is_approved: false, // EXPLICITLY false - requires admin approval
+    is_approved: isSupervisorOrAdmin, // Supervisors auto-approve, suppliers need approval
     is_flash_deal: formData.get("is_flash_deal") === "true",
     flash_discount_pct: formData.get("flash_discount_pct")
       ? parseFloat(formData.get("flash_discount_pct") as string)
@@ -66,9 +67,9 @@ export async function createSupplierProduct(formData: FormData) {
     console.log("[DEBUG] Insert error:", error);
     return { error: error.message };
   }
-  console.log("[DEBUG] Product inserted with is_approved: false");
+  console.log(`[DEBUG] Product inserted with is_approved: ${isSupervisorOrAdmin}`);
   revalidatePath("/admin/inventory");
   revalidatePath("/", "layout");
   revalidatePath("/supplier/dashboard");
-  return { success: true, isApproved: false };
+  return { success: true, isApproved: isSupervisorOrAdmin };
 }
