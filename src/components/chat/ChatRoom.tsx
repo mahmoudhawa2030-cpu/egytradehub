@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  Send, Check, CheckCheck, ArrowLeft, Clock, AlertCircle,
+  Send, CheckCheck, ArrowLeft, Clock, AlertCircle,
   Smile, Paperclip, Image as ImageIcon, X, Download, FileText,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -361,7 +361,7 @@ export default function ChatRoom({ myId, peer, onBack, showHeader = true, classN
                         ) : msg.is_read ? (
                           <CheckCheck className="w-3.5 h-3.5 text-blue-500" />
                         ) : (
-                          <Check className="w-3.5 h-3.5" />
+                          <CheckCheck className="w-3.5 h-3.5 text-neutral-400" />
                         ))}
                     </div>
                   </div>
