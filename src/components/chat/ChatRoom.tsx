@@ -125,7 +125,7 @@ export default function ChatRoom({ myId, peer, onBack, showHeader = true, classN
           });
         return prev;
       });
-    }, 4000);
+    }, 2000);
     return () => clearInterval(interval);
   }, [room, myId, supabase]);
 
@@ -158,9 +158,11 @@ export default function ChatRoom({ myId, peer, onBack, showHeader = true, classN
       )
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "messages", filter: `room_id=eq.${room}` },
+        { event: "UPDATE", schema: "public", table: "messages" },
         (payload) => {
           const msg = payload.new as Message;
+          // Only update if this message belongs to our room
+          if (msg.room_id && msg.room_id !== room) return;
           setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, ...msg } : m)));
         }
       )
