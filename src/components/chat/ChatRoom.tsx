@@ -102,6 +102,33 @@ export default function ChatRoom({ myId, peer, onBack, showHeader = true, classN
       .eq("is_read", false);
   }, [room, myId, supabase]);
 
+  // Poll read-status for our sent messages every 4s as fallback for realtime UPDATE
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      // Only fetch IDs of our sent messages that are still unread
+      setMessages((prev) => {
+        const unreadMine = prev.filter((m) => m.sender_id === myId && !m.is_read && !m.pending);
+        if (unreadMine.length === 0) return prev;
+        supabase
+          .from("messages")
+          .select("id, is_read")
+          .in("id", unreadMine.map((m) => m.id))
+          .then(({ data }) => {
+            if (!data) return;
+            setMessages((cur) =>
+              cur.map((m) => {
+                const updated = (data as { id: string; is_read: boolean }[]).find((d) => d.id === m.id);
+                if (updated && updated.is_read !== m.is_read) return { ...m, is_read: updated.is_read };
+                return m;
+              })
+            );
+          });
+        return prev;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [room, myId, supabase]);
+
   useEffect(() => {
     loadMessages();
     const channel = supabase
