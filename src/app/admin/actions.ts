@@ -113,6 +113,50 @@ export async function changeUserRole(userId: string, role: "buyer" | "supplier" 
   revalidatePath("/admin/users");
 }
 
+/**
+ * Promote/demote a user to/from supervisor.
+ * Uses the admin (service-role) client so the change bypasses RLS,
+ * and verifies the caller is actually an admin first.
+ * Returns the updated row so the caller can confirm the role really changed.
+ */
+export async function setSupervisorRole(
+  userId: string,
+  promote: boolean,
+): Promise<{ success: true; role: string } | { error: string }> {
+  // 1. Verify caller is an admin (must use the user-bound client for auth).
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: callerProfile, error: callerErr } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+  if (callerErr) return { error: `Could not verify caller: ${callerErr.message}` };
+  if (callerProfile?.role !== "admin") return { error: "Only admins can change supervisor role" };
+
+  // 2. Apply the change with the service-role client so RLS can't block it.
+  const adminDb = createAdminClient();
+  const newRole = promote ? "supervisor" : "buyer";
+  const { data, error } = await adminDb
+    .from("profiles")
+    .update({ role: newRole })
+    .eq("user_id", userId)
+    .select("user_id, role")
+    .single();
+
+  if (error) return { error: `Update failed: ${error.message}` };
+  if (!data) return { error: "User not found" };
+  if (data.role !== newRole) {
+    return { error: `Update did not persist (got '${data.role}' instead of '${newRole}'). Check that the profile_role enum has the 'supervisor' value.` };
+  }
+
+  revalidatePath("/admin/supervisors");
+  revalidatePath("/admin/users");
+  return { success: true, role: data.role };
+}
+
 export async function banUser(userId: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ is_banned: true }).eq("user_id", userId);

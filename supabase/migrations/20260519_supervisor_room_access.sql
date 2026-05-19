@@ -1,4 +1,20 @@
 -- ============================================================
+-- Defensive: make sure the 'supervisor' enum value exists.
+-- (No-op if already added by 20260505_supervisor.sql)
+-- ============================================================
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_enum e
+    join pg_type t on t.oid = e.enumtypid
+    where t.typname = 'profile_role' and e.enumlabel = 'supervisor'
+  ) then
+    alter type public.profile_role add value 'supervisor';
+  end if;
+end $$;
+
+-- ============================================================
 -- Allow supervisors to take over any conversation room.
 -- Adds a room-based read policy so original participants
 -- still see messages a supervisor injects into their room

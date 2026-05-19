@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Plus, ShieldCheck, Trash2, UserCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { setSupervisorRole } from "@/app/admin/actions";
 
 type Profile = {
   user_id: string;
@@ -37,7 +38,11 @@ export default function SupervisorsPage() {
 
   function promote(userId: string) {
     startTransition(async () => {
-      await supabase.from("profiles").update({ role: "supervisor" }).eq("user_id", userId);
+      const res = await setSupervisorRole(userId, true);
+      if ("error" in res) {
+        alert(`Failed to promote: ${res.error}`);
+        return;
+      }
       setShowPicker(false);
       await load();
     });
@@ -46,7 +51,11 @@ export default function SupervisorsPage() {
   function demote(userId: string) {
     if (!confirm("Remove supervisor role from this user?")) return;
     startTransition(async () => {
-      await supabase.from("profiles").update({ role: "buyer" }).eq("user_id", userId);
+      const res = await setSupervisorRole(userId, false);
+      if ("error" in res) {
+        alert(`Failed to demote: ${res.error}`);
+        return;
+      }
       await load();
     });
   }
