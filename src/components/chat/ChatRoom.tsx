@@ -67,9 +67,14 @@ interface ChatRoomProps {
   onBack?: () => void;
   showHeader?: boolean;
   className?: string;
+  /**
+   * Optional explicit room id. When provided (e.g. supervisor takeover),
+   * this exact room is used instead of deriving one from myId+peer.
+   */
+  roomOverride?: string;
 }
 
-export default function ChatRoom({ myId, peer, onBack, showHeader = true, className = "" }: ChatRoomProps) {
+export default function ChatRoom({ myId, peer, onBack, showHeader = true, className = "", roomOverride }: ChatRoomProps) {
   const supabase = createClient();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -84,7 +89,7 @@ export default function ChatRoom({ myId, peer, onBack, showHeader = true, classN
   const inputRef = useRef<HTMLInputElement>(null);
   const { notify } = useChatNotifications();
 
-  const room = buildRoomId(myId, peer.user_id);
+  const room = roomOverride ?? buildRoomId(myId, peer.user_id);
 
   const loadMessages = useCallback(async () => {
     const { data } = await supabase
