@@ -127,6 +127,16 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </nav>
 
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+          {/* ── TOP: Title bar — sits above the gallery on every viewport ── */}
+          <div className="border-b border-neutral-100 px-6 md:px-8 pt-6 pb-5">
+            <p className="text-xs uppercase tracking-widest text-[#FF6A00] font-semibold mb-1">
+              {product.category}
+            </p>
+            <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 leading-snug">
+              {product.name}
+            </h1>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-[610px_1fr]">
             {/* ── LEFT: Gallery ── */}
             <div className="border-b lg:border-b-0 lg:border-r border-neutral-100 p-6">
@@ -137,18 +147,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               />
             </div>
 
-            {/* ── RIGHT: Info panel ── */}
+            {/* ── RIGHT: Info panel (title removed — now lives above the gallery) ── */}
             <div className="p-6 md:p-8 flex flex-col justify-between" style={{ minHeight: 572 }}>
-              {/* Top: name + category */}
-              <div>
-                <p className="text-xs uppercase tracking-widest text-[#FF6A00] font-semibold mb-1">
-                  {product.category}
-                </p>
-                <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 leading-snug">
-                  {product.name}
-                </h1>
-              </div>
-
               {/* Price rows table */}
               <div className="mt-5 rounded-xl border border-neutral-100 overflow-hidden text-sm">
                 {/* Unit price */}
